@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jenis_cutis', function (Blueprint $table) {
+        Schema::create('divisi', function (Blueprint $table) {
         $table->id();
-        $table->string('nama_cuti');
-        $table->string('kode_cuti')->unique();
-        $table->integer('durasi_default')->nullable();
-        $table->boolean('is_tahunan')->default(false);
-        $table->text('keterangan')->nullable();
+        $table->string('nama_divisi');
+        $table->string('kode_divisi')->unique();
         $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jenis_cutis');
+        Schema::dropIfExists('divisi');
     }
 };
