@@ -42,7 +42,6 @@ return new class extends Migration
                 'pending_direktur',
                 'disetujui',
                 'ditolak',
-                'dibatalkan'
             ])->default('pending_lead');
 
             $table->foreignId('current_approver_id')
@@ -56,14 +55,6 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->text('alasan_penolakan')
-                ->nullable();
-
-            $table->foreignId('dibatalkan_oleh')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $table->text('alasan_pembatalan')
                 ->nullable();
 
             $table->timestamp('approved_at')
