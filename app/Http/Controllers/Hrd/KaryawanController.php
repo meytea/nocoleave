@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Hrd;
 
 use Illuminate\Http\Request;
 use App\Models\Divisi;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
 
 class KaryawanController extends Controller
 {
