@@ -11,12 +11,20 @@ class RoleSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+     public function run(): void
     {
-        Role::create(['name' => 'karyawan']);
-        Role::create(['name' => 'lead']);
-        Role::create(['name' => 'head']);
-        Role::create(['name' => 'hrd']);
-        Role::create(['name' => 'direktur']);
+        $roles = [
+            'karyawan',
+            'lead',
+            'head',
+            'hrd',
+            'direktur',
+        ];
+
+        foreach ($roles as $role) {
+            Role::firstOrCreate([
+                'name' => $role
+            ]);
+        }
     }
 }
