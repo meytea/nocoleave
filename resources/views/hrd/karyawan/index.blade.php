@@ -38,11 +38,12 @@
                 <thead class="bg-gray-50 uppercase text-xs text-gray-500 tracking-wide">
                     <tr>
                         <th class="px-6 py-4 text-left">No</th>
+                        <th class="px-6 py-4 text-left">Foto</th>
                         <th class="px-6 py-4 text-left">Nama</th>
                         <th class="px-6 py-4 text-left">Email</th>
                         <th class="px-6 py-4 text-left">NIK</th>
                         <th class="px-6 py-4 text-left">Divisi</th>
-                        <th class="px-6 py-4 text-left">Role</th>
+                        <th class="px-6 py-4 text-left">Jabatan</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -57,6 +58,9 @@
                             {{ $loop->iteration }}
                         </td>
 
+                        <td class="px-6 py-4 font-medium text-gray-800">
+                            {{ $item->foto }}
+                        </td>
                         <td class="px-6 py-4 font-medium text-gray-800">
                             {{ $item->name }}
                         </td>
@@ -83,6 +87,10 @@
 
                             <div class="flex items-center justify-center gap-3">
 
+                                <a href="{{ route('karyawan.edit', $item->id) }}"
+                                    class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-semibold">
+                                    Detail
+                                </a>
                                 <a href="{{ route('karyawan.edit', $item->id) }}"
                                     class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Edit

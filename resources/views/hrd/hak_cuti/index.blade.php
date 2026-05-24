@@ -8,17 +8,17 @@
 
         <div>
             <h1 class="text-3xl font-bold text-gray-800">
-                Data Divisi
+                Data Hak Cuti
             </h1>
 
             <p class="mt-1 text-gray-500">
-                Kelola data divisi perusahaan.
+                Kelola Data Hak Cuti karyawan.
             </p>
         </div>
 
-        <a href="{{ route('divisi.create') }}"
+        <a href="{{ route('hak_cuti.create') }}"
             class="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-3 rounded-xl font-medium transition">
-            + Tambah Divisi
+            + Tambah Hak Cuti
         </a>
 
     </div>
@@ -38,15 +38,19 @@
                 <thead class="bg-gray-50 uppercase text-xs text-gray-500 tracking-wide">
                     <tr>
                         <th class="px-6 py-4 text-left">No</th>
-                        <th class="px-6 py-4 text-left">Nama Divisi</th>
-                        <th class="px-6 py-4 text-center">Jumlah Karyawan</th>
+                        <th class="px-6 py-4 text-left">Nama Karyawan</th>
+                        <th class="px-6 py-4 text-center">Jenis Cuti</th>
+                        <th class="px-6 py-4 text-center">Tahun</th>
+                        <th class="px-6 py-4 text-center">Kuota Cuti</th>
+                        <th class="px-6 py-4 text-center">Terpakai</th>
+                        <th class="px-6 py-4 text-center">Sisa Cuti</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
 
                 <tbody>
 
-                    @forelse ($divisi as $item)
+                    @forelse ($hak_cuti as $item)
 
                     <tr class="border-t border-gray-100">
 
@@ -55,28 +59,37 @@
                         </td>
 
                         <td class="px-6 py-4 font-medium text-gray-800">
-                            {{ $item->nama_divisi }}
+                            {{ $item->user->name }}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-gray-800">
+                            {{ $item->jenisCuti->nama_cuti }}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-gray-800">
+                            {{ $item->tahun }}
                         </td>
 
-                        <td class="px-6 py-4 ">
-                            <div class="flex items-center justify-center gap-2">
-                                <span class="px-3 py-1 rounded-full bg-cyan-100 block text-cyan-700 text-xs font-semibold ">
-                                    {{ $item->users_count }}
-                                </span>
-                            </div>
+                        <td class="px-6 py-4 text-center">
+                            {{ $item->jenisCuti->kuota }}
+                        </td>
 
+                        <td class="px-6 py-4 text-center">
+                            {{ $item->terpakai }}
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            {{ $item->sisa }}
                         </td>
 
                         <td class="px-6 py-4">
 
                             <div class="flex items-center justify-center gap-3">
 
-                                <a href="{{ route('divisi.edit', $item->id) }}"
+                                <a href="{{ route('jenis_cuti.edit', $item->id) }}"
                                     class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Edit
                                 </a>
 
-                                <form action="{{ route('divisi.destroy', $item->id) }}"
+                                <form action="{{ route('jenis_cuti.destroy', $item->id) }}"
                                     method="POST">
                                     @csrf
                                     @method('DELETE')
@@ -100,7 +113,7 @@
                     <tr>
                         <td colspan="4"
                             class="px-6 py-8 text-center text-gray-500">
-                            Data divisi belum tersedia.
+                            Jenis Cuti belum tersedia.
                         </td>
                     </tr>
 
@@ -111,12 +124,13 @@
             </table>
 
         </div>
-
     </div>
 
-    <div class="mt-6">
-        {{ $divisi->links() }}
-    </div>
+    <!-- <div class="mt-6">
+        {{ $hak_cuti->links() }}
+    </div> -->
+
+   
 
 
     @endsection

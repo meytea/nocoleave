@@ -13,7 +13,6 @@ class HakCuti extends Model
         'user_id',
         'jenis_cuti_id',
         'tahun',
-        'jatah',
         'terpakai',
         'sisa',
     ];

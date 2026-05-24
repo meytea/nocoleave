@@ -9,6 +9,8 @@ use App\Http\Controllers\Lead\DashboardController as LeadDashboardController;
 use App\Http\Controllers\Head\DashboardController as HeadDashboardController;
 use App\Http\Controllers\Direktur\DashboardController as DirekturDashboardController;
 use App\Http\Controllers\Karyawan\DashboardController as KaryawanDashboardController;
+use App\Http\Controllers\Hrd\JenisCutiController;
+use App\Http\Controllers\Hrd\HakCutiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -55,6 +57,8 @@ Route::middleware(['auth', 'role:karyawan'])->group(function () {
 Route::middleware(['auth', 'role:hrd'])->group(function () {
     Route::resource('/hrd/divisi', DivisiController::class);
     Route::resource('/hrd/karyawan', KaryawanController::class);
+    Route::resource('/hrd/jenis_cuti', JenisCutiController::class);
+    Route::resource('/hrd/hak_cuti', HakCutiController::class);
 });
 
 

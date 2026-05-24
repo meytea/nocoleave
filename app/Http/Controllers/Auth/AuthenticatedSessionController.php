@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
             return redirect('/direktur/dashboard');
         }
 
-        return redirect('/dashboard');
+        return redirect('/karyawan/dashboard');
     }
 
     /**

@@ -13,7 +13,9 @@ class DivisiController extends Controller
      */
     public function index()
     {
-        $divisi = Divisi::latest()->paginate(10);
+        $divisi = Divisi::withCount('users')
+            ->latest()
+            ->paginate(10);
 
         return view('hrd.divisi.index', compact('divisi'));
     }

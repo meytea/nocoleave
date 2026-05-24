@@ -25,8 +25,6 @@ return new class extends Migration
 
             $table->year('tahun');
 
-            $table->integer('jatah')->default(0);
-
             $table->integer('terpakai')->default(0);
 
             $table->integer('sisa')->default(0);
