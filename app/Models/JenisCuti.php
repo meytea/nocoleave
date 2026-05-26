@@ -11,10 +11,8 @@ class JenisCuti extends Model
 
     protected $fillable = [
         'nama_cuti',
-        'kode_cuti',
-        'durasi_default',
+        'kuota',
         'is_tahunan',
-        'keterangan',
     ];
 
     public function hakCuti(): HasMany

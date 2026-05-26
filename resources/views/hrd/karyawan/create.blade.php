@@ -25,7 +25,7 @@
 
                     <input type="text"
                            name="name"
-                           value="{{ old('name') }}"
+                           value=""
                            class="w-full rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
                 </div>
 
@@ -36,7 +36,8 @@
 
                     <input type="email"
                            name="email"
-                           value="{{ old('email') }}"
+                           autocomplete="new-password"
+                           value=""
                            class="w-full rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
                 </div>
 

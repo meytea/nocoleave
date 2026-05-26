@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Hrd;
 
 use Illuminate\Http\Request;
 use App\Models\Divisi;
+use App\Http\Controllers\Controller;
 
 class DivisiController extends Controller
 {
@@ -12,10 +13,11 @@ class DivisiController extends Controller
      */
     public function index()
     {
-          $divisi = Divisi::latest()->paginate(10);
+        $divisi = Divisi::withCount('users')
+            ->latest()
+            ->paginate(10);
 
         return view('hrd.divisi.index', compact('divisi'));
-        
     }
 
     /**

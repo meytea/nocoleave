@@ -13,14 +13,16 @@
 
     <div class="min-h-screen flex">
 
+
         {{-- Sidebar --}}
         @include('layouts.sidebar')
-
+         <!-- @include('layouts.coba') -->
+        
         {{-- Main Content --}}
         <div class="flex-1 flex flex-col">
-
             {{-- Navbar --}}
             @include('layouts.navbar')
+
 
             {{-- Content --}}
             <main class="flex-1 p-6 overflow-y-auto">

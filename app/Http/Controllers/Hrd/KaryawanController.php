@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Hrd;
 
 use Illuminate\Http\Request;
 use App\Models\Divisi;
 use App\Models\User;
+use App\Models\HakCuti;
+use App\Models\JenisCuti;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class KaryawanController extends Controller
 {
@@ -59,6 +63,9 @@ class KaryawanController extends Controller
         ]);
 
         $user->assignRole($validated['role']);
+
+        // Generate hak cuti otomatis
+        $this->generateHakCuti($user);
 
         return redirect()
             ->route('karyawan.index')
@@ -124,5 +131,39 @@ class KaryawanController extends Controller
         return redirect()
             ->route('karyawan.index')
             ->with('success', 'Karyawan berhasil dihapus');
+    }
+
+    /**
+     * Generate hak cuti otomatis untuk user baru
+     * Hanya jenis cuti dengan is_tahunan = true yang dibuatkan
+     */
+    private function generateHakCuti(User $user): void
+    {
+        // Ambil semua jenis cuti yang bersifat tahunan
+        $jenisCutiTahunan = JenisCuti::where('is_tahunan', true)->get();
+
+        $tahunSekarang = Carbon::now()->year;
+
+        foreach ($jenisCutiTahunan as $jenisCuti) {
+            // Cek apakah sudah ada hak cuti untuk user + jenis cuti + tahun
+            $exists = HakCuti::where('user_id', $user->id)
+                ->where('jenis_cuti_id', $jenisCuti->id)
+                ->where('tahun', $tahunSekarang)
+                ->exists();
+
+            if (!$exists) {
+                // Gunakan durasi_default sebagai jatah
+                $jatah = $jenisCuti->kuota;
+
+                HakCuti::create([
+                    'user_id' => $user->id,
+                    'jenis_cuti_id' => $jenisCuti->id,
+                    'tahun' => $tahunSekarang,
+                    'jatah' => $jatah,
+                    'terpakai' => 0,
+                    'sisa' => $jatah,
+                ]);
+            }
+        }
     }
 }

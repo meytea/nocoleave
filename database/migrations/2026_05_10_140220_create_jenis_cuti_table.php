@@ -14,10 +14,8 @@ return new class extends Migration
         Schema::create('jenis_cuti', function (Blueprint $table) {
         $table->id();
         $table->string('nama_cuti');
-        $table->string('kode_cuti')->unique();
-        $table->integer('durasi_default')->nullable();
+        $table->integer('kuota')->nullable();
         $table->boolean('is_tahunan')->default(false);
-        $table->text('keterangan')->nullable();
         $table->timestamps();
         });
     }
