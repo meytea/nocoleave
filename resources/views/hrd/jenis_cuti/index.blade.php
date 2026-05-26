@@ -70,6 +70,7 @@
                                     class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Edit
                                 </a>
+                                
 
                                 <form action="{{ route('jenis_cuti.destroy', $item->id) }}"
                                     method="POST">

@@ -34,7 +34,7 @@
                     </label>
 
                     <input type="number"
-                        name="durasi_default"
+                        name="kuota"
                         class="w-full rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
                 </div>
 

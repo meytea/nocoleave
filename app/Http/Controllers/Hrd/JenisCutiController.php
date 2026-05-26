@@ -34,19 +34,15 @@ class JenisCutiController extends Controller
 
         $validated = $request->validate([
             'nama_cuti' => 'required|string|max:255',
-            'kode_cuti' => 'required|string|max:50|unique:jenis_cuti,kode_cuti',
             'kuota' => 'required|integer|min:1',
             'is_tahunan' => 'nullable|boolean',
-            'keterangan' => 'nullable|string',
         ]);
 
         JenisCuti::create([
-            
+
             'nama_cuti' => $validated['nama_cuti'],
-            'kode_cuti' => $validated['kode_cuti'],
             'kuota' => $validated['kuota'],
             'is_tahunan' => $request->has('is_tahunan'),
-            'keterangan' => $validated['keterangan'] ?? null,
         ]);
 
         return redirect()
@@ -65,14 +61,30 @@ class JenisCutiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(JenisCuti $JenisCuti)
-    {;
+    public function edit(JenisCuti $jenis_cuti)
+    {
+        return view('hrd.jenis_cuti.edit', compact('jenis_cuti'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, JenisCuti $jenis_cuti) {}
+
+    public function update(Request $request, JenisCuti $jenis_cuti)
+    {
+    $validated = $request->validate([
+        'nama_cuti' => 'required|string|max:255|unique:jenis_cuti,nama_cuti,' . $jenis_cuti->id,
+        'kuota' => 'required|integer|min:1',
+        'is_tahunan' => 'nullable|boolean',
+    ]);
+
+    $jenis_cuti->update([
+        'nama_cuti' => $validated['nama_cuti'],
+        'kuota' => $validated['kuota'],
+        'is_tahunan' => $request->has('is_tahunan'),
+    ]);
+
+    return redirect()
+        ->route('jenis_cuti.index')
+        ->with('success', 'Jenis cuti berhasil diperbarui');
+}
 
     /**
      * Remove the specified resource from storage.

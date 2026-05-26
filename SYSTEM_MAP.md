@@ -3,110 +3,138 @@
 - **Tujuan sistem**: Sistem pengajuan cuti karyawan berbasis web bernama NocoLeave untuk PT Nocola IoT Solution.
 - **Tech stack**: Laravel 12, PHP 8.3, MySQL, Blade, Tailwind CSS, Alpine.js, Laravel Breeze, Spatie Laravel Permission.
 - **Arsitektur Laravel**: MVC standar dengan Eloquent ORM, middleware auth, role-based access menggunakan Spatie Permission, Laravel Breeze auth.
-- **Konsep workflow approval**: Multi-level approval berjenjang berdasarkan role (karyawan -> lead -> hrd -> head -> direktur), dengan tracking status dan history approval. Struktur sudah dirancang di model/migration/routes, namun implementasi full approval workflow masih belum lengkap.
-- **Refactoring terbaru**: Controller sudah diorganisir per-role dalam folder terpisah (Hrd/, Karyawan/, Lead/, Head/, Direktur/).
+- **Konsep workflow approval**: Multi-level approval berjenjang berdasarkan role (karyawan -> lead -> hrd -> head -> direktur), dengan tracking status dan history approval. Struktur sudah dirancang di model/migration/routes.
+- **Refactoring terbaru**: Controller diorganisir per-role dalam folder terpisah. HRD memiliki master data management: divisi, karyawan, jenis cuti, dan hak cuti.
 
 # Core Logic Flow
 
 - **Login**: Route GET/POST `/login` -> `AuthenticatedSessionController[create/store]` -> `User` model -> `users` table.
-- **HRD dashboard**: Route GET `/hrd/dashboard` [role:hrd] -> `Hrd\DashboardController@index` -> view `dashboard.hrd`.
-- **Lead dashboard**: Route GET `/lead/dashboard` [role:lead] -> `Lead\DashboardController@index` -> view `dashboard.lead`.
-- **Head dashboard**: Route GET `/head/dashboard` [role:head] -> `Head\DashboardController@index` -> view `dashboard.head`.
-- **Direktur dashboard**: Route GET `/direktur/dashboard` [role:direktur] -> `Direktur\DashboardController@index` -> view `dashboard.direktur`.
-- **Karyawan dashboard**: Route GET `/karyawan/dashboard` [role:karyawan] -> `Karyawan\DashboardController@index` -> view `dashboard.karyawan`.
-- **Divisi master (HRD)**: Resource route `/hrd/divisi` [role:hrd] -> `Hrd\DivisiController` (`index/create/store/edit/update/destroy`) -> `Divisi` model -> `divisi` table.
-- **Karyawan master (HRD)**: Resource route `/hrd/karyawan` [role:hrd] -> `Hrd\KaryawanController` (`index/create/store/edit/update/destroy`) -> `User` model -> `users` table + role assignment.
-- **Pengajuan cuti**: Belum ada route implementasi; hanya ada `PengajuanCutiController` skeleton.
-- **Approval cuti**: Belum ada route implementasi; hanya ada `ApprovalCutiController` skeleton.
+- **HRD dashboard**: Route GET `/hrd/dashboard` [role:hrd] -> `Hrd\DashboardController@index` -> view `hrd/dashboard`.
+- **Lead dashboard**: Route GET `/lead/dashboard` [role:lead] -> `Lead\DashboardController@index` -> view `lead/dashboard`.
+- **Head dashboard**: Route GET `/head/dashboard` [role:head] -> `Head\DashboardController@index` -> view `head/dashboard`.
+- **Direktur dashboard**: Route GET `/direktur/dashboard` [role:direktur] -> `Direktur\DashboardController@index` -> view `direktur/dashboard`.
+- **Karyawan dashboard**: Route GET `/karyawan/dashboard` [role:karyawan] -> `Karyawan\DashboardController@index` -> view `karyawan/dashboard`.
+
+## HRD Master Data Modules
+- **Divisi master**: Resource route `/hrd/divisi` [role:hrd] -> `Hrd\DivisiController` (CRUD) -> `Divisi` model -> `divisi` table.
+- **Karyawan master**: Resource route `/hrd/karyawan` [role:hrd] -> `Hrd\KaryawanController` (CRUD) -> `User` model + role assignment via Spatie.
+- **Jenis Cuti master**: Resource route `/hrd/jenis_cuti` [role:hrd] -> `Hrd\JenisCutiController` (CRUD) -> `JenisCuti` model -> `jenis_cuti` table.
+- **Hak Cuti master**: Resource route `/hrd/hak_cuti` [role:hrd] -> `Hrd\HakCutiController` (CRUD) -> `HakCuti` model -> `hak_cuti` table. Menampilkan relasi user dan jenis cuti.
+
+## Workflow Cuti (Belum Implementasi)
+- **Pengajuan cuti**: Belum ada route; `PengajuanCutiController` skeleton.
+- **Approval cuti**: Belum ada route; `ApprovalCutiController` skeleton.
+- **Monitoring cuti**: Belum ada route implementasi.
 
 # Database Structure
 
 Entity inti dengan relasi:
 
-- **users**: id, name, foto, email, password, nik, jenis_kelamin, divisi_id, is_active, remember_token. Relasi: `belongsTo(Divisi)`, `hasMany(PengajuanCuti)`, `hasMany(HakCuti)`, `hasMany(ApprovalCuti)` sebagai approver.
-- **divisi**: id, nama_divisi. Relasi: `hasMany(User)`.
-- **jenis_cuti**: id, nama_cuti, kode_cuti, durasi_default, is_tahunan, keterangan. Relasi: `hasMany(HakCuti)`, `hasMany(PengajuanCuti)`.
-- **hak_cuti**: id, user_id, jenis_cuti_id, tahun, jatah, terpakai, sisa. Relasi: `belongsTo(User)`, `belongsTo(JenisCuti)`.
-- **pengajuan_cuti**: id, kode_pengajuan, user_id, jenis_cuti_id, tanggal_mulai, tanggal_selesai, tanggal_masuk, jumlah_hari, alasan, status (enum: pending_lead, pending_hrd, pending_head, pending_direktur, disetujui, ditolak), current_approver_id, ditolak_oleh, alasan_penolakan, approved_at. Relasi: `belongsTo(User)`, `belongsTo(JenisCuti)`, `hasMany(ApprovalCuti)`, `belongsTo(User, current_approver_id)`, `belongsTo(User, ditolak_oleh)`.
+- **users**: id, name, foto, email, password, nik, jenis_kelamin, divisi_id, is_active, remember_token, timestamps, soft deletes. Relasi: `belongsTo(Divisi)`, `hasMany(PengajuanCuti)`, `hasMany(HakCuti)`, `hasMany(ApprovalCuti)` sebagai approver.
+- **divisi**: id, nama_divisi, timestamps. Relasi: `hasMany(User)`.
+- **jenis_cuti**: id, nama_cuti, kode_cuti, kuota, is_tahunan, keterangan, timestamps. Relasi: `hasMany(HakCuti)`, `hasMany(PengajuanCuti)`.
+- **hak_cuti**: id, user_id, jenis_cuti_id, tahun, jatah, terpakai, sisa, timestamps. Relasi: `belongsTo(User)`, `belongsTo(JenisCuti)`.
+- **pengajuan_cuti**: id, kode_pengajuan, user_id, jenis_cuti_id, tanggal_mulai, tanggal_selesai, tanggal_masuk, jumlah_hari, alasan, status (enum: pending_lead, pending_hrd, pending_head, pending_direktur, disetujui, ditolak), current_approver_id, ditolak_oleh, alasan_penolakan, approved_at, timestamps, soft deletes. Relasi: `belongsTo(User)`, `belongsTo(JenisCuti)`, `hasMany(ApprovalCuti)`, `belongsTo(User, current_approver_id)`, `belongsTo(User, ditolak_oleh)`.
 - **approval_cuti**: id, pengajuan_cuti_id, approver_id, level_approval, status (approved/rejected), catatan, approved_at, timestamps, soft deletes. Relasi: `belongsTo(PengajuanCuti)`, `belongsTo(User, approver_id)`.
 
-Relasi utama: `User -> Divisi`, `User -> PengajuanCuti -> JenisCuti`, `PengajuanCuti -> ApprovalCuti`, `User -> HakCuti -> JenisCuti`.
+Relasi utama: `User -> Divisi`, `User -> HakCuti -> JenisCuti`, `User -> PengajuanCuti -> JenisCuti`, `PengajuanCuti -> ApprovalCuti -> User`.
 
 # Role & Permission Map
 
 - **Role**: `karyawan`, `lead`, `head`, `hrd`, `direktur`.
-- **Hak akses**: Spatie Permission digunakan; role-based middleware diterapkan di route level.
-- **Dashboard enforcement**: Setiap role memiliki route `/[role]/dashboard` yang terlindungi middleware `role:[role]`.
-- **Approval responsibility**:
-  - `karyawan`: mengajukan cuti, akses dashboard karyawan.
-  - `lead`: level pertama approval, akses dashboard lead.
-  - `hrd`: level berikutnya, master data divisi/karyawan, akses dashboard HRD.
-  - `head`: approval lanjutan, akses dashboard head.
-  - `direktur`: approval final, akses dashboard direktur.
-- **AdminSeeder**: membuat user admin HRD default (email: admin@nocoleave.com, password: password).
+- **Hak akses**: Spatie Permission; role-based middleware di route level.
+- **Dashboard enforcement**: Setiap role `/[role]/dashboard` terlindungi middleware `role:[role]`.
+- **HRD privileges**:
+  - Master divisi: create/read/update/delete divisi.
+  - Master karyawan: create/read/update/delete user + assign role.
+  - Master jenis cuti: create/read/update/delete jenis cuti.
+  - Master hak cuti: read hak cuti per user.
+- **Approval responsibility** (struktur ada, implementasi pending):
+  - `karyawan`: ajukan cuti.
+  - `lead`: approve level 1.
+  - `hrd`: approve level 2, monitoring master data.
+  - `head`: approve level 3.
+  - `direktur`: approve final.
+- **AdminSeeder**: user admin HRD default (email: admin@nocoleave.com, password: password).
 
 # Module Map
 
 ## Routes
-- `routes/web.php`: route auth, profile, dan role-based dashboard + HRD master data resource.
-- `routes/auth.php`: Laravel Breeze auth route standard.
+- `routes/web.php`: auth, profile, role-based dashboard, HRD master data resource.
+- `routes/auth.php`: Laravel Breeze standard auth.
 
 ## Controllers (Role-based)
-- `app/Http/Controllers/Hrd/DashboardController.php`: HRD dashboard view.
-- `app/Http/Controllers/Hrd/DivisiController.php`: CRUD divisi.
-- `app/Http/Controllers/Hrd/KaryawanController.php`: CRUD pengguna/karyawan dan role assignment.
-- `app/Http/Controllers/Karyawan/DashboardController.php`: Karyawan dashboard view.
-- `app/Http/Controllers/Lead/DashboardController.php`: Lead dashboard view.
-- `app/Http/Controllers/Head/DashboardController.php`: Head dashboard view.
-- `app/Http/Controllers/Direktur/DashboardController.php`: Direktur dashboard view.
-- `app/Http/Controllers/ApprovalCutiController.php`: skeleton approval cuti.
-- `app/Http/Controllers/PengajuanCutiController.php`: skeleton pengajuan cuti.
-- `app/Http/Controllers/ProfileController.php`: profile user standard.
+### HRD Module
+- `Hrd/DashboardController.php`: HRD dashboard view.
+- `Hrd/DivisiController.php`: CRUD divisi.
+- `Hrd/KaryawanController.php`: CRUD user/karyawan + role assignment.
+- `Hrd/JenisCutiController.php`: CRUD jenis cuti (paginate 10, store dengan validation).
+- `Hrd/HakCutiController.php`: CRUD hak cuti dengan relasi user & jenis cuti.
+
+### Dashboard Controllers
+- `Karyawan/DashboardController.php`: karyawan dashboard view.
+- `Lead/DashboardController.php`: lead dashboard view.
+- `Head/DashboardController.php`: head dashboard view.
+- `Direktur/DashboardController.php`: direktur dashboard view.
+
+### Skeleton (Pending Implementation)
+- `PengajuanCutiController.php`: pengajuan cuti skeleton.
+- `ApprovalCutiController.php`: approval cuti skeleton.
+- `ProfileController.php`: user profile management.
 
 ## Models
-- `app/Models/User.php`: model user dengan `HasRoles`, relasi ke Divisi, PengajuanCuti, HakCuti.
-- `app/Models/PengajuanCuti.php`: model pengajuan cuti.
-- `app/Models/ApprovalCuti.php`: model approval cuti.
-- `app/Models/HakCuti.php`: model hak cuti.
-- `app/Models/JenisCuti.php`: model jenis cuti.
-- `app/Models/Divisi.php`: model divisi.
-- `app/Models/Jabatan.php`: model jabatan (kosong, belum dipakai).
+- `User.php`: `HasRoles`, relasi Divisi, PengajuanCuti, HakCuti, ApprovalCuti.
+- `Divisi.php`: relasi hasMany User.
+- `JenisCuti.php`: relasi hasMany HakCuti, PengajuanCuti.
+- `HakCuti.php`: relasi belongsTo User, JenisCuti.
+- `PengajuanCuti.php`: relasi belongsTo/hasMany.
+- `ApprovalCuti.php`: relasi belongsTo PengajuanCuti, User.
+- `Jabatan.php`: kosong, belum diintegrasikan.
 
 ## Seeders
-- `database/seeders/RoleSeeder.php`: seed role (karyawan, lead, head, hrd, direktur).
-- `database/seeders/AdminSeeder.php`: seed admin HRD default.
-- `database/seeders/DivisiSeeder.php`: seed divisi awal (10 divisi).
-- `database/seeders/JenisCutiSeeder.php`: seed jenis cuti (9 tipe).
-- `database/seeders/DatabaseSeeder.php`: memanggil `RoleSeeder`, `AdminSeeder`, `DivisiSeeder`, `JenisCutiSeeder`.
+- `RoleSeeder.php`: seed role (karyawan, lead, head, hrd, direktur).
+- `AdminSeeder.php`: seed admin HRD.
+- `DivisiSeeder.php`: seed 10 divisi awal.
+- `JenisCutiSeeder.php`: seed 9 jenis cuti awal.
+- `DatabaseSeeder.php`: call RoleSeeder -> AdminSeeder -> DivisiSeeder -> JenisCutiSeeder.
 
 ## Views (Role-based)
-- `resources/views/hrd/` (divisi/, karyawan/): HRD master data views.
-- `resources/views/karyawan/`: Karyawan dashboard view.
-- `resources/views/lead/`: Lead dashboard view.
-- `resources/views/head/`: Head dashboard view.
-- `resources/views/direktur/`: Direktur dashboard view.
-- `resources/views/dashboard/`: Dashboard views per role.
-- `resources/views/auth/`: Auth views (Breeze).
-- `resources/views/profile/`: Profile views.
+### HRD Master Data
+- `hrd/divisi/`: index, create, edit.
+- `hrd/karyawan/`: index, create, edit.
+- `hrd/jenis_cuti/`: index, create, edit.
+- `hrd/hak_cuti/`: index, create, edit.
+
+### Dashboards
+- `dashboard/`: role-specific dashboard views.
+- `karyawan/`, `lead/`, `head/`, `direktur/`: role folder (dashboard views).
+
+### Standard
+- `auth/`: login, register, password reset.
+- `profile/`: user profile edit.
+- `layouts/app.blade.php`: main layout.
+- `welcome.blade.php`: landing page.
 
 # Workflow Approval Map
 
-Struktur approval mapping (di database/model sudah ada):
-- Karyawan ajukan cuti -> status `pending_lead` -> Lead review/reject.
-- Jika Lead approve -> status `pending_hrd` -> HRD review/reject.
-- Jika HRD approve -> status `pending_head` -> Head review/reject.
-- Jika Head approve -> status `pending_direktur` -> Direktur review/reject.
-- Final: `disetujui` atau `ditolak`.
+**Struktural (Model/DB):**
+- Pengajuan status: pending_lead -> pending_hrd -> pending_head -> pending_direktur -> disetujui/ditolak.
+- ApprovalCuti table: track per approver dan level.
+- Relasi: pengajuan_cuti.current_approver_id, ditolak_oleh.
 
-**Catatan**: Alur approval sudah dipetakan di model/migration, tetapi route/controller operasional untuk pengajuan dan approval cuti belum ada di `routes/web.php`.
+**Operasional (Implementasi Pending):**
+- Route untuk create pengajuan cuti: **BELUM**.
+- Route untuk approval per role: **BELUM**.
+- View pengajuan cuti form: **BELUM**.
+- View approval workflow dashboard: **BELUM**.
 
 # Clean Tree
 
 ```
 app/
   Http/Controllers/
-    ApprovalCutiController.php
-    PengajuanCutiController.php
+    ApprovalCutiController.php (skeleton)
+    PengajuanCutiController.php (skeleton)
     ProfileController.php
     Direktur/
       DashboardController.php
@@ -114,8 +142,10 @@ app/
       DashboardController.php
     Hrd/
       DashboardController.php
-      DivisiController.php
-      KaryawanController.php
+      DivisiController.php (CRUD)
+      KaryawanController.php (CRUD)
+      JenisCutiController.php (CRUD)
+      HakCutiController.php (CRUD)
     Karyawan/
       DashboardController.php
     Lead/
@@ -124,7 +154,7 @@ app/
     ApprovalCuti.php
     Divisi.php
     HakCuti.php
-    Jabatan.php
+    Jabatan.php (empty)
     JenisCuti.php
     PengajuanCuti.php
     User.php
@@ -149,8 +179,15 @@ routes/
 resources/views/
   admin/
   auth/
+    login.blade.php
+    register.blade.php
   components/
   dashboard/
+    hrd.blade.php
+    karyawan.blade.php
+    lead.blade.php
+    head.blade.php
+    direktur.blade.php
   direktur/
   head/
   hrd/
@@ -162,19 +199,41 @@ resources/views/
       index.blade.php
       create.blade.php
       edit.blade.php
+    jenis_cuti/
+      index.blade.php
+      create.blade.php
+      edit.blade.php
+    hak_cuti/
+      index.blade.php
+      create.blade.php
+      edit.blade.php
   karyawan/
   lead/
   profile/
-  welcome.blade.php
   layouts/
     app.blade.php
+    guest.blade.php
+  welcome.blade.php
 ```
 
 # Risks / Blind Spots
 
-- `PengajuanCutiController` dan `ApprovalCutiController` masih skeleton; workflow pengajuan dan approval cuti belum terimplementasi.
-- Route untuk pengajuan cuti, approval, dan monitoring cuti belum ada di `routes/web.php`.
-- Permission CRUD atau action granular belum didefinisikan; hanya role dasar di middleware.
-- Tidak ada API endpoint; semua via web route.
-- `Jabatan` model belum diintegrasikan atau digunakan.
-- View workflow/approval pages belum ada di views.
+- **Workflow approval cuti belum implementasi**: Route pengajuan, approval, dan monitoring cuti masih skeleton. Pendekatan implementasi belum jelas.
+- **Permintaan flow per role unclear**: Bagaimana karyawan mengajukan? Bagaimana lead/head/direktur melakukan approval? UI/route belum ada.
+- **HakCuti view incomplete**: Edit/destroy HakCuti belum terimplementasi penuh; hanya index dan create.
+- **JenisCuti schema updated**: Field `durasi_default` diubah menjadi `kuota`; migration perlu dikonfirmasi.
+- **API endpoint tidak ada**: Semua via web route; tidak ada REST API untuk operasi.
+- **Testing belum ada**: Unit/feature test untuk approval workflow belum ditemukan.
+- **Jabatan model unused**: Masih kosong, tidak ada relasi atau penggunaan di controller.
+
+# Implementation Checklist (Next Steps)
+
+- [ ] Implementasi route pengajuan cuti (karyawan).
+- [ ] Implementasi dashboard approval per role (lead/head/direktur).
+- [ ] Implementasi approval action (approve/reject) dengan status update.
+- [ ] Implementasi monitoring cuti karyawan (history approval).
+- [ ] Fix HakCuti edit/destroy controller.
+- [ ] Konfirmasi schema JenisCuti (durasi_default vs kuota).
+- [ ] Integrate Jabatan model jika diperlukan.
+- [ ] Add email notification untuk approval action.
+- [ ] Add role-specific redirect di dashboard.
