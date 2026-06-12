@@ -89,7 +89,7 @@
                                     Edit
                                 </a>
 
-                                <form action="{{ route('jenis_cuti.destroy', $item->id) }}"
+                                <form action="{{ route('hak_cuti.destroy', $item->id) }}"
                                     method="POST">
                                     @csrf
                                     @method('DELETE')

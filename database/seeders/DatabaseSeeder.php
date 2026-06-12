@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             DivisiSeeder::class,
             JenisCutiSeeder::class,
+            HakCutiSeeder::class,
         ]);
 
         // User::factory(10)->create();

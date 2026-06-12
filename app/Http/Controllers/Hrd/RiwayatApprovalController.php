@@ -1,18 +1,30 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Hrd;
 
-use App\Models\PengajuanCuti;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\PengajuanCuti;
+use App\Models\ApprovalCuti;
+use Illuminate\Support\Facades\Auth;
 
-class PengajuanCutiController extends Controller
+
+class RiwayatApprovalController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        $riwayatApproval = ApprovalCuti::with([
+            'approver',
+            'pengajuanCuti.user',
+            'pengajuanCuti.jenisCuti'
+        ])
+            ->latest()
+            ->paginate(10);
+
+        return view('hrd.riwayat_approval.index', compact('riwayatApproval'));
     }
 
     /**
@@ -34,7 +46,7 @@ class PengajuanCutiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PengajuanCuti $pengajuanCuti)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +54,7 @@ class PengajuanCutiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PengajuanCuti $pengajuanCuti)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +62,7 @@ class PengajuanCutiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PengajuanCuti $pengajuanCuti)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +70,7 @@ class PengajuanCutiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PengajuanCuti $pengajuanCuti)
+    public function destroy(string $id)
     {
         //
     }

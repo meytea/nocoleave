@@ -1,18 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Hrd;
 
-use App\Models\ApprovalCuti;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\PengajuanCuti;
 
-class ApprovalCutiController extends Controller
+
+class RiwayatCutiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])
+        ->latest()
+        ->paginate(10);
+
+    return view('hrd.riwayat_cuti.index', compact('pengajuanCuti'));
     }
 
     /**
@@ -34,7 +43,7 @@ class ApprovalCutiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ApprovalCuti $approvalCuti)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +51,7 @@ class ApprovalCutiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ApprovalCuti $approvalCuti)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +59,7 @@ class ApprovalCutiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ApprovalCuti $approvalCuti)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +67,7 @@ class ApprovalCutiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ApprovalCuti $approvalCuti)
+    public function destroy(string $id)
     {
         //
     }
