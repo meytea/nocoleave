@@ -11,12 +11,10 @@ class PengajuanCuti extends Model
     protected $table = 'pengajuan_cuti';
 
     protected $fillable = [
-        'kode_pengajuan',
         'user_id',
         'jenis_cuti_id',
         'tanggal_mulai',
         'tanggal_selesai',
-        'tanggal_masuk',
         'jumlah_hari',
         'alasan',
         'status',

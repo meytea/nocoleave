@@ -1,56 +1,52 @@
 {{-- Dashboard --}}
-<div>
-    <a href="{{ route('direktur.dashboard') }}"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('direktur.dashboard') ? 'bg-cyan-100 text-cyan-700 font-semibold shadow-sm' : 'text-slate-600 hover:bg-gray-100' }}">
-        <x-heroicon-o-squares-2x2 class="w-5 h-5 shrink-0" />
-        <span class="text-sm font-medium">Dashboard</span>
-    </a>
-</div>
+<a href="{{ route('lead.dashboard') }}"
+    class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 mb-4 {{ request()->routeIs('lead.dashboard') ? 'bg-cyan-100 text-cyan-700 font-semibold shadow-sm' : 'text-slate-600 hover:bg-gray-100' }}">
+    <x-heroicon-o-squares-2x2 class="w-5 h-5 shrink-0" />
+    <span class="text-sm font-medium">Dashboard Direktur</span>
+</a>
 
-{{-- Data Karyawan --}}
-<div>
-    <h3 class="px-4 mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Data</h3>
-    <div class="space-y-2">
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
+{{-- Data Karyawan Collapsible --}}
+<div x-data="{ open: false }">
+    <a href="#"
+        class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
+        <div class="flex items-center gap-3">
             <x-heroicon-o-users class="w-5 h-5 shrink-0" />
             <span class="text-sm font-medium">Data Karyawan</span>
+        </div>
+    </a>
+
+</div>
+
+{{-- Approval Cuti Collapsible --}}
+<div x-data="{ open: false }">
+    <button @click="open = !open"
+        class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
+        <div class="flex items-center gap-3">
+            <x-heroicon-o-shield-check class="w-5 h-5 shrink-0" />
+            <span class="text-sm font-medium">Approval Cuti</span>
+        </div>
+        <x-heroicon-o-chevron-down
+            x-bind:class="{ 'rotate-180': open }"
+            class="w-4 h-4 transition-transform duration-200" />
+    </button>
+    <div x-show="open" x-transition class="space-y-1 mt-1 ml-4 border-l border-gray-200 pl-3">
+        <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-slate-600 hover:bg-gray-100 transition-all duration-200">
+            <x-heroicon-o-clock class="w-4 h-4 shrink-0" />
+            <span>Pending</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-slate-600 hover:bg-gray-100 transition-all duration-200">
+            <x-heroicon-o-check-badge class="w-4 h-4 shrink-0" />
+            <span>Disetujui</span>
+        </a>
+        <a href="{{ route('lead.approval_cuti.ditolak') }}" class="flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-slate-600 hover:bg-gray-100 transition-all duration-200">
+            <x-heroicon-o-no-symbol class="w-4 h-4 shrink-0" />
+            <span>Ditolak</span>
         </a>
     </div>
 </div>
 
-{{-- Approval Cuti Section --}}
-<div>
-    <h3 class="px-4 mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Approval Cuti</h3>
-    <div class="space-y-2">
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
-            <x-heroicon-o-clock class="w-5 h-5 shrink-0" />
-            <span class="text-sm font-medium">Pending Approval</span>
-        </a>
-
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
-            <x-heroicon-o-check-badge class="w-5 h-5 shrink-0" />
-            <span class="text-sm font-medium">Approval Disetujui</span>
-        </a>
-
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
-            <x-heroicon-o-no-symbol class="w-5 h-5 shrink-0" />
-            <span class="text-sm font-medium">Approval Ditolak</span>
-        </a>
-    </div>
-</div>
-
-{{-- Laporan Section --}}
-<div>
-    <h3 class="px-4 mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Laporan</h3>
-    <div class="space-y-2">
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-gray-100">
-            <x-heroicon-o-document-chart-bar class="w-5 h-5 shrink-0" />
-            <span class="text-sm font-medium">Riwayat Cuti</span>
-        </a>
-    </div>
-</div>
+<a href="#"
+    class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 mb-4 ">
+    <x-heroicon-o-document-chart-bar class="w-5 h-5 shrink-0  text-slate-600" />
+    <span class="text-sm font-medium  text-slate-600">Riwayat Cuti</span>
+</a>

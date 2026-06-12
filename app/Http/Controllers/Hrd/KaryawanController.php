@@ -21,7 +21,7 @@ class KaryawanController extends Controller
     {
         $karyawan = User::with('divisi')
             ->latest()
-            ->paginate(10);
+            ->paginate(10);;
 
         return view('hrd.karyawan.index', compact('karyawan'));
     }

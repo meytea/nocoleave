@@ -7,7 +7,7 @@
     {{-- HEADER SECTION --}}
     <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-900">Dashboard Lead</h1>
-        <p class="text-gray-600 mt-2">Selamat Datang</p>
+        <p class="text-gray-600 mt-2">Selamat Datang Lead</p>
     </div>
 
     {{-- STATISTICS CARDS --}}

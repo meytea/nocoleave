@@ -10,21 +10,22 @@ class ApprovalCuti extends Model
 {
     use SoftDeletes;
 
+    public $timestamps = false;
+
     protected $table = 'approval_cuti';
 
     protected $fillable = [
         'pengajuan_cuti_id',
-        'approver_id',
-        'level_approval',
-        'status',
-        'catatan',
-        'approved_at',
+        'approver_id', // user yang melakukan approval/reject
+        'status', //disetujui, ditolak
+        'catatan', // kalo ditolak
+        'created_at', // timestamp approval/reject   
     ];
 
     protected function casts(): array
     {
         return [
-            'approved_at' => 'datetime',
+            'created_at' => 'datetime',
         ];
     }
 

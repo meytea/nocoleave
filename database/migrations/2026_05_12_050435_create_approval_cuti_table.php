@@ -23,19 +23,15 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->integer('level_approval');
-
             $table->enum('status', [
-                'approved',
-                'rejected'
+                'disetujui',
+                'ditolak'
             ]);
 
             $table->text('catatan')
                 ->nullable();
 
-            $table->timestamp('approved_at');
-
-            $table->timestamps();
+            $table->timestamp('created_at');
 
             $table->softDeletes();
         });

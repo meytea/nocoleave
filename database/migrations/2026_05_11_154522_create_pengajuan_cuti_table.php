@@ -15,8 +15,6 @@ return new class extends Migration
 
             $table->id();
 
-            $table->string('kode_pengajuan')->unique();
-
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->cascadeOnDelete();
@@ -28,8 +26,6 @@ return new class extends Migration
             $table->date('tanggal_mulai');
 
             $table->date('tanggal_selesai');
-
-            $table->date('tanggal_masuk');
 
             $table->integer('jumlah_hari');
 
