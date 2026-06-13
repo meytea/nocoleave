@@ -21,8 +21,17 @@
 
                     </div>
 
-                    <div class="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center text-white font-bold uppercase">
-                        {{ substr(Auth::user()->name, 0, 1) }}
+                    <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200">
+
+                        <img
+                            src="{{ !Auth::user()->foto
+            ? asset('images/default_profile.jpg')
+            : (str_starts_with(Auth::user()->foto, 'images/')
+                ? asset(Auth::user()->foto)
+                : asset('storage/' . Auth::user()->foto)) }}"
+                            alt="{{ Auth::user()->name }}"
+                            class="w-full h-full object-cover">
+
                     </div>
 
                 </button>

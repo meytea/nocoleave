@@ -58,8 +58,29 @@
                             {{ $loop->iteration }}
                         </td>
 
-                        <td class="px-6 py-4 font-medium text-gray-800">
-                            {{ $item->foto }}
+                        <td class="px-6 py-4">
+
+                            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
+
+                                @if ($item->foto)
+
+                                <img
+                                    src="{{ str_starts_with($item->foto, 'images/')
+                                            ? asset($item->foto)
+                                            : asset('storage/' . $item->foto) }}"
+                                    alt="{{ $item->name }}"
+                                    class="w-full h-full object-cover">
+
+                                @else
+
+                                <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500 font-bold">
+                                    {{ strtoupper(substr($item->name, 0, 1)) }}
+                                </div>
+
+                                @endif
+
+                            </div>
+
                         </td>
                         <td class="px-6 py-4 font-medium text-gray-800">
                             {{ $item->name }}

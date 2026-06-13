@@ -25,7 +25,7 @@ use App\Http\Controllers\Head\PengajuanCutiController as HeadPengajuanCutiContro
 use App\Http\Controllers\Hrd\HeadController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 

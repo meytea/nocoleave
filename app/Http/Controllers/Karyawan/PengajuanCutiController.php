@@ -134,11 +134,7 @@ class PengajuanCutiController extends Controller
             'jenisCuti'
         ])
             ->where('user_id', $user->id)
-            ->whereIn('status', [
-                'pending_hrd',
-                'pending_head',
-                'disetujui'
-            ])
+            ->where('status', 'disetujui')
             ->latest()
             ->paginate(10);
 
