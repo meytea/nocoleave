@@ -28,6 +28,78 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">
             Detail Pengajuan Cuti
         </h2>
+        
+        <!-- Stepper -->
+        <div class="mb-6">
+
+            <div class="flex items-start justify-between relative">
+                
+
+                @foreach($workflow as $index => $step)
+
+                <div class="flex-1 flex flex-col items-center relative">
+
+                    <!-- Garis -->
+                    @if(!$loop->last)
+                    <div class="absolute top-5 left-1/2 w-full h-1 z-0">
+
+                        <div class="h-full
+                        @if($rejectedStep !== null)
+                            {{ $index < $rejectedStep ? 'bg-green-500' : 'bg-gray-200' }}
+                        @else
+                            {{ $index < $currentStep ? 'bg-green-500' : 'bg-gray-200' }}
+                        @endif">
+                        </div>
+
+                    </div>
+                    @endif
+
+                    <!-- Bulatnya -->
+                    <div class="relative z-10 w-12 h-12 rounded-full flex items-center justify-center shadow-sm border-2
+                        @if($rejectedStep !== null)
+
+                            @if($index < $rejectedStep)
+                                bg-green-500 border-green-500 text-white
+                            @elseif($index == $rejectedStep)
+                                bg-red-500 border-red-500 text-white
+                            @else
+                                bg-white border-gray-300 text-gray-400
+                            @endif
+                        @else
+
+                        @if($index < $currentStep)
+                                bg-green-500 border-green-500 text-white
+                            @elseif($index == $currentStep)
+                                bg-cyan-500 border-cyan-500 text-white
+                            @else
+                                bg-white border-gray-300 text-gray-400
+                            @endif
+                        @endif">
+
+                        <!-- Icon Stepper -->
+                        @if($rejectedStep !== null && $index == $rejectedStep)
+                            <x-heroicon-s-x-mark class="w-5 h-5" />
+                        @elseif($index < $rejectedStep)
+                            <x-heroicon-s-check class="w-5 h-5" />
+                        @elseif($index < $currentStep)
+                            <x-heroicon-s-check class="w-5 h-5" />
+                        @elseif($index == $currentStep)
+                            <x-heroicon-s-clock class="w-5 h-5" />
+                        @else
+                            <x-heroicon-o-minus class="w-5 h-5" />
+                        @endif  
+                    </div>
+
+                    <span class="mt-3 text-sm font-medium text-gray-700">
+                        {{ $step }}
+                    </span>
+                </div>
+
+                @endforeach
+
+            </div>
+
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -48,14 +120,14 @@
             <div>
                 <p class="text-sm text-gray-500">Tanggal Mulai</p>
                 <p class="font-semibold">
-                    {{ $pengajuanCuti->tanggal_mulai }}
+                    {{ $pengajuanCuti->tanggal_mulai?->format('d M Y') ?? '-' }}
                 </p>
             </div>
 
             <div>
                 <p class="text-sm text-gray-500">Tanggal Selesai</p>
                 <p class="font-semibold">
-                    {{ $pengajuanCuti->tanggal_selesai }}
+                    {{ $pengajuanCuti->tanggal_selesai?->format('d M Y') ?? '-' }}
                 </p>
             </div>
 
@@ -69,7 +141,7 @@
             <div>
                 <p class="text-sm text-gray-500">Tanggal Masuk</p>
                 <p class="font-semibold">
-                    {{ $pengajuanCuti->tanggal_masuk }}
+                    {{ $pengajuanCuti->tanggal_masuk?->format('d M Y') ?? '-' }}
                 </p>
             </div>
 
@@ -130,7 +202,13 @@
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ $item->approver->name ?? '-' }}
+                            <div class="font-medium">
+                                {{ $item->approver->name ?? '-' }}
+                            </div>
+
+                            <div class="text-xs text-gray-500">
+                                {{ $item->approver->roles->first()->name ?? '-' }}
+                            </div>
                         </td>
 
                         <td class="px-6 py-4 text-center">
@@ -185,7 +263,7 @@
 
     </div>
     <div class="flex justify-end">
-        <a href="{{ url()->previous() }}"
+        <a href="{{ route('karyawan.pengajuan_cuti.index') }}"
             class="inline-block mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
             Kembali
         </a>

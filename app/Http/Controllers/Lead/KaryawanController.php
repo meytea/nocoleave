@@ -35,4 +35,11 @@ class KaryawanController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    public function show(User $karyawan)
+    {
+        return view(
+            'lead.karyawan.detail',
+            compact('karyawan')
+        );
+    }
 }

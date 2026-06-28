@@ -42,8 +42,8 @@
                         <th class="px-6 py-4 text-left">Nama</th>
                         <th class="px-6 py-4 text-left">Email</th>
                         <th class="px-6 py-4 text-left">NIK</th>
-                        <th class="px-6 py-4 text-left">Divisi</th>
                         <th class="px-6 py-4 text-left">Jabatan</th>
+                        <th class="px-6 py-4 text-left">Divisi</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -94,24 +94,26 @@
                             {{ $item->nik }}
                         </td>
 
-                        <td class="px-6 py-4 text-gray-600">
-                            {{ $item->divisi?->nama_divisi ?? '-' }}
-                        </td>
-
-                        <td class="px-6 py-4">
+                         <td class="px-6 py-4">
                             <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 text-xs uppercase font-semibold">
                                 {{ $item->getRoleNames()->first() }}
                             </span>
                         </td>
 
+                        <td class="px-6 py-4 text-gray-600">
+                            {{ $item->divisi?->nama_divisi ?? '-' }}
+                        </td>
+
+                       
+
                         <td class="px-6 py-4">
 
                             <div class="flex items-center justify-center gap-3">
 
-                                <a href="{{ route('karyawan.edit', $item->id) }}"
-                                    class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-semibold">
+                                <a href="{{ route('karyawan.show', $item->id) }}"
+                                    class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Detail
-                                </a>
+                                </a>    
                                 <a href="{{ route('karyawan.edit', $item->id) }}"
                                     class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Edit

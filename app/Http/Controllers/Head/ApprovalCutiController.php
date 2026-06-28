@@ -40,6 +40,86 @@ class ApprovalCutiController extends Controller
         );
     }
 
+
+    public function setuju(PengajuanCuti $pengajuanCuti)
+    {
+        if ($pengajuanCuti->status !== 'pending_head') {
+            return redirect()->back()
+                ->with('error', 'Pengajuan sudah diproses.');
+        }
+
+        ApprovalCuti::create([
+            'pengajuan_cuti_id' => $pengajuanCuti->id,
+            'approver_id'       => Auth::id(),
+            'status'            => 'disetujui',
+            'catatan'           => null,
+            'created_at'        => now(),
+        ]);
+
+        // Ambil relasi jenis cuti
+        $pengajuanCuti->load('jenisCuti');
+
+        // Hanya cuti tahunan yang mengurangi kuota
+        if ($pengajuanCuti->jenisCuti->is_tahunan) {
+
+            $tahunCuti = \Carbon\Carbon::parse(
+                $pengajuanCuti->tanggal_mulai
+            )->year;
+
+            $hakCuti = HakCuti::where('user_id', $pengajuanCuti->user_id)
+                ->where('jenis_cuti_id', $pengajuanCuti->jenis_cuti_id)
+                ->where('tahun', $tahunCuti)
+                ->first();
+
+            if ($hakCuti) {
+
+                $hakCuti->update([
+                    'terpakai' => $hakCuti->terpakai + $pengajuanCuti->jumlah_hari,
+                    'sisa'     => $hakCuti->sisa - $pengajuanCuti->jumlah_hari,
+                ]);
+            }
+        }
+
+        $pengajuanCuti->update([
+            'status'              => 'disetujui',
+            'current_approver_id' => null,
+            'approved_at'         => now(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Pengajuan cuti berhasil disetujui.');
+    }
+
+    public function tolak(Request $request, PengajuanCuti $pengajuanCuti)
+    {
+        $request->validate([
+            'alasan_penolakan' => 'required|string',
+        ]);
+
+        if ($pengajuanCuti->status !== 'pending_head') {
+            return redirect()->back()
+                ->with('error', 'Pengajuan sudah diproses.');
+        }
+
+        ApprovalCuti::create([
+            'pengajuan_cuti_id' => $pengajuanCuti->id,
+            'approver_id'       => Auth::id(),
+            'status'            => 'ditolak',
+            'catatan'           => $request->alasan_penolakan,
+            'created_at'        => now(),
+        ]);
+
+        $pengajuanCuti->update([
+            'status'             => 'ditolak',
+            'ditolak_oleh'       => Auth::id(),
+            'alasan_penolakan'   => $request->alasan_penolakan,
+            'current_approver_id' => null,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Pengajuan berhasil ditolak.');
+    }
+
     public function pengajuanDitolak()
     {
         $user = Auth::user();
@@ -76,7 +156,7 @@ class ApprovalCutiController extends Controller
             'jenisCuti'
         ])
             ->whereIn('status', [
-                'pending_head',
+                'pending_direktur',
                 'disetujui'
             ])
             ->whereHas('user', function ($query) use ($divisi) {
@@ -89,82 +169,6 @@ class ApprovalCutiController extends Controller
             'head.approval_cuti.disetujui',
             compact('pengajuan_cuti')
         );
-
-        //return "Halaman pengajuan cuti yang ditolak oleh lead. Fitur ini masih dalam pengembangan.";
-    }
-
-    public function setuju(PengajuanCuti $pengajuanCuti)
-    {
-        if ($pengajuanCuti->status !== 'pending_head') {
-            return redirect()->back()
-                ->with('error', 'Pengajuan sudah diproses.');
-        }
-
-        ApprovalCuti::create([
-            'pengajuan_cuti_id' => $pengajuanCuti->id,
-            'approver_id'       => Auth::id(),
-            'status'            => 'disetujui',
-            'catatan'           => null,
-            'created_at'        => now(),
-        ]);
-
-        // Ambil relasi jenis cuti
-        $pengajuanCuti->load('jenisCuti');
-
-        // Hanya cuti tahunan yang mengurangi kuota
-        if ($pengajuanCuti->jenisCuti->is_tahunan) {
-
-            $hakCuti = HakCuti::where('user_id', $pengajuanCuti->user_id)
-                ->where('jenis_cuti_id', $pengajuanCuti->jenis_cuti_id)
-                ->first();
-
-            if ($hakCuti) {
-
-                $hakCuti->update([
-                    'terpakai' => $hakCuti->terpakai + $pengajuanCuti->jumlah_hari,
-                    'sisa'     => $hakCuti->sisa - $pengajuanCuti->jumlah_hari,
-                ]);
-            }
-        }
-
-        $pengajuanCuti->update([
-            'status'              => 'disetujui',
-            'approved_at'         => now(),
-            'current_approver_id' => null,
-        ]);
-
-        return redirect()->back()
-            ->with('success', 'Pengajuan cuti berhasil disetujui.');
-    }
-
-    public function tolak(Request $request, PengajuanCuti $pengajuanCuti)
-    {
-        $request->validate([
-            'alasan_penolakan' => 'required|string',
-        ]);
-
-        if ($pengajuanCuti->status !== 'pending_lead') {
-            return redirect()->back()
-                ->with('error', 'Pengajuan sudah diproses.');
-        }
-
-        ApprovalCuti::create([
-            'pengajuan_cuti_id' => $pengajuanCuti->id,
-            'approver_id'       => Auth::id(),
-            'status'            => 'ditolak',
-            'catatan'           => $request->alasan_penolakan,
-            'created_at'        => now(),
-        ]);
-
-        $pengajuanCuti->update([
-            'status'             => 'ditolak',
-            'ditolak_oleh'       => Auth::id(),
-            'alasan_penolakan'   => $request->alasan_penolakan,
-            'current_approver_id' => null,
-        ]);
-
-        return redirect()->back()
-            ->with('success', 'Pengajuan berhasil ditolak.');
     }
 
     /**

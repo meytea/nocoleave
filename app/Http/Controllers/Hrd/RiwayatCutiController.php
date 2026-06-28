@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers\Hrd;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanCuti;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ApprovalCuti;
+use App\Models\JenisCuti;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanCutiTahunanExport;
+use App\Exports\LaporanCutiNonTahunanExport;
 
 
 class RiwayatCutiController extends Controller
@@ -12,17 +18,176 @@ class RiwayatCutiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $pengajuanCuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
-        ->latest()
-        ->paginate(10);
 
-    return view('hrd.riwayat_cuti.index', compact('pengajuanCuti'));
+            ->when($request->search, function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'hrd.riwayat_cuti.index',
+            compact('pengajuanCuti')
+        );
     }
+
+    public function show($id)
+    {
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])->findOrFail($id);
+
+        $riwayatApproval = ApprovalCuti::with([
+            'approver.roles'
+        ])
+            ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+            ->latest()
+            ->get();
+
+        return view(
+            'hrd.riwayat_cuti.detail',
+            compact(
+                'riwayatApproval',
+                'pengajuanCuti'
+            )
+        );
+    }
+
+    public function destroy($id)
+    {
+        $pengajuanCuti = PengajuanCuti::findOrFail($id);
+
+        if (in_array($pengajuanCuti->status, [
+            'disetujui',
+            'ditolak'
+        ])) {
+
+            return back()->with(
+                'error',
+                'Pengajuan cuti yang telah memperoleh keputusan akhir tidak dapat dihapus.'
+            );
+        }
+
+        $pengajuanCuti->delete();
+
+        return back()->with(
+            'success',
+            'Pengajuan cuti berhasil dihapus.'
+        );
+    }
+
+    public function disetujui(Request $request)
+    {
+        $pengajuanCuti = PengajuanCuti::with([
+            'user.roles',
+            'user.divisi',
+            'jenisCuti'
+        ])
+            ->where('status', 'disetujui')
+
+            ->when($request->search, function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhere('nik', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        });
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'hrd.riwayat_cuti.disetujui',
+            compact('pengajuanCuti')
+        );
+    }
+
+    public function laporan()
+    {
+        $jenisCuti = JenisCuti::orderBy('nama_cuti')->get();
+
+        return view(
+            'hrd.riwayat_cuti.laporan',
+            compact('jenisCuti')
+        );
+    }
+
+    public function export(Request $request)
+{
+     if ($request->jenis_laporan == 'tahunan') {
+
+        return Excel::download(
+            new LaporanCutiTahunanExport($request->tahun),
+            'Laporan_Cuti_Tahunan_' . $request->tahun . '.xlsx'
+        );
+
+    }
+
+    return Excel::download(
+        new LaporanCutiNonTahunanExport(
+            $request->tahun,
+            $request->jenis_cuti_id
+        ),
+        'Laporan_Cuti_Non_Tahunan_' . $request->tahun . '.xlsx'
+    );
+}
 
     /**
      * Show the form for creating a new resource.
@@ -43,32 +208,19 @@ class RiwayatCutiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

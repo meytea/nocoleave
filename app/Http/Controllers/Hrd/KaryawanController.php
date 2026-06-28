@@ -26,9 +26,7 @@ class KaryawanController extends Controller
         return view('hrd.karyawan.index', compact('karyawan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    //
     public function create()
     {
         $divisi = Divisi::all();
@@ -76,9 +74,12 @@ class KaryawanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $karyawan)
     {
-        //
+        return view(
+            'hrd.karyawan.detail',
+            compact('karyawan')
+        );
     }
 
     /**
