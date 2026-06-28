@@ -8,64 +8,207 @@ use App\Http\Controllers\Controller;
 use App\Models\PengajuanCuti;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\JenisCuti;
+use App\Models\HakCuti;
 
 class ApprovalCutiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Tampilan halaman index untuk approval cuti
+    public function index(Request $request)
     {
-
-
-        $pengajuan_cuti = PengajuanCuti::with(['user', 'jenisCuti'])
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])
             ->where('status', 'pending_hrd')
-            ->latest()
-            ->paginate(10);
+            ->when($request->search, function ($query) use ($request) {
 
-        return view('hrd.approval_cuti.index', compact('pengajuan_cuti'));
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    // Nama dan Jabatan
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        // Jenis Cuti
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        // Status
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+        return view(
+            'hrd.approval_cuti.index',
+            compact('pengajuanCuti')
+        );
     }
 
-    public function pengajuanDitolak()
+    // Tampilan halaman untuk pengajuan cuti yang ditolak
+    public function pengajuanDitolak(Request $request)
     {
         $user = Auth::user();
-        $pengajuan_cuti = PengajuanCuti::with([
+
+        $pengajuanCuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
-            ->where('status', 'ditolak')
+            ->whereHas('approvalCuti', function ($query) use ($user) {
+
+                $query->where('approver_id', $user->id)
+                    ->where('status', 'ditolak');
+            })
+
+            ->when($request->search, function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('hrd.approval_cuti.ditolak', compact('pengajuan_cuti'));
-
-        //return "Halaman pengajuan cuti yang ditolak oleh lead. Fitur ini masih dalam pengembangan.";
+        return view(
+            'hrd.approval_cuti.ditolak',
+            compact('pengajuanCuti')
+        );
     }
-    public function pengajuanDisetujui()
+
+    //return "Halaman pengajuan cuti yang ditolak oleh lead. Fitur ini masih dalam pengembangan.";
+
+
+    // Tampilan halaman untuk pengajuan cuti yang disetujui
+    public function pengajuanDisetujui(Request $request)
     {
         $user = Auth::user();
 
-        $pengajuan_cuti = PengajuanCuti::with([
+        $pengajuanCuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
-            ->whereIn('status', [
-                'pending_head',
-                'disetujui'
-            ])
+            ->whereHas('approvalCuti', function ($query) use ($user) {
+
+                $query->where('approver_id', $user->id)
+                    ->where('status', 'disetujui');
+            })
+
+            ->when($request->search, function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('hrd.approval_cuti.disetujui', compact('pengajuan_cuti'));
-
-        //return "Halaman pengajuan cuti yang ditolak oleh lead. Fitur ini masih dalam pengembangan.";
+        return view(
+            'hrd.approval_cuti.disetujui',
+            compact('pengajuanCuti')
+        );
     }
 
+    // Proses setuju pengajuan cuti oleh HRD
     public function setuju(PengajuanCuti $pengajuanCuti)
     {
         if ($pengajuanCuti->status !== 'pending_hrd') {
             return redirect()->back()
                 ->with('error', 'Pengajuan sudah diproses.');
+        }
+
+        $userPengaju = $pengajuanCuti->user;
+
+        if ($userPengaju->hasRole('head')) {
+
+            $direktur = User::role('direktur')->first();
+
+            if (!$direktur) {
+                return redirect()->back()
+                    ->with('error', 'User Direktur tidak ditemukan.');
+            }
+
+            ApprovalCuti::create([
+                'pengajuan_cuti_id' => $pengajuanCuti->id,
+                'approver_id'       => Auth::id(),
+                'status'            => 'disetujui',
+                'catatan'           => null,
+                'created_at'        => now(),
+            ]);
+
+            $pengajuanCuti->update([
+                'status'              => 'pending_direktur',
+                'current_approver_id' => $direktur->id,
+            ]);
+
+            return redirect()->back()
+                ->with('success', 'Pengajuan berhasil disetujui dan diteruskan ke Direktur.');
         }
 
         $head = User::role('head')->first();
@@ -89,9 +232,10 @@ class ApprovalCutiController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', 'Pengajuan berhasil diteruskan ke Head.');
+            ->with('success', 'Pengajuan berhasil disetujui dan diteruskan ke Head.');
     }
 
+    // Proses tolak pengajuan cuti oleh HRD
     public function tolak(Request $request, PengajuanCuti $pengajuanCuti)
     {
         $request->validate([
@@ -122,6 +266,33 @@ class ApprovalCutiController extends Controller
             ->with('success', 'Pengajuan berhasil ditolak.');
     }
 
+
+    // Tampilam detail pada Approval Cuti
+
+    public function show($id)
+    {
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])->findOrFail($id);
+
+        $riwayatApproval = ApprovalCuti::with([
+            'approver.roles'
+        ])
+            ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+            ->latest()
+            ->get();
+
+        return view(
+            'hrd.approval_cuti.detail',
+            compact(
+                'pengajuanCuti',
+                'riwayatApproval'
+            )
+        );
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */
@@ -141,10 +312,6 @@ class ApprovalCutiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ApprovalCuti $approvalCuti)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.

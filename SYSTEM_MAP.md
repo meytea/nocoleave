@@ -3,14 +3,16 @@
 - **Tujuan sistem**: Sistem pengajuan cuti karyawan berbasis web bernama NocoLeave untuk PT Nocola IoT Solution.
 - **Tech stack**: Laravel 12, PHP 8.3, MySQL, Blade, Tailwind CSS, Alpine.js, Laravel Breeze, Spatie Laravel Permission.
 - **Arsitektur Laravel**: MVC per-role dengan Eloquent ORM, middleware auth, role-based access Spatie Permission.
-- **Status**: **WORKFLOW APPROVAL FULLY IMPLEMENTED** - Pengajuan & approval cuti untuk semua role sudah operasional.
-- **Refactoring**: Controller diorganisir per-role (Hrd/, Karyawan/, Lead/, Head/, Direktur/) dengan workflow approval lengkap.
+- **Status**: **WORKFLOW APPROVAL 95% COMPLETE** - Karyawan ? Lead ? HRD ? Head fully operational. Direktur pending route integration.
+- **Update**: Landing page redirect ke login (tidak perlu welcome page untuk non-auth). Direktur struktur controller siap tapi route belum terintegrasi.
 
 # Core Logic Flow
 
-## Authentication & Profile
-- **Login**: Route GET/POST `/login` -> `AuthenticatedSessionController[create/store]` -> `User` model.
-- **Profile**: Route GET/PATCH/DELETE `/profile` -> `ProfileController` -> update user data.
+## Authentication & Landing
+- **Landing**: Route GET `/` -> redirect ke `/login` (perlu auth untuk akses sistem).
+- **Login**: Route GET/POST `/login` -> `AuthenticatedSessionController[create/store]`.
+- **Register**: Route GET/POST `/register` -> `RegisteredUserController[create/store]`.
+- **Profile**: Route GET/PATCH/DELETE `/profile` -> `ProfileController`.
 
 ## Role-Based Dashboards
 - **Karyawan**: Route GET `/karyawan/dashboard` -> `Karyawan\DashboardController@index`.
@@ -19,51 +21,52 @@
 - **HRD**: Route GET `/hrd/dashboard` -> `Hrd\DashboardController@index`.
 - **Direktur**: Route GET `/direktur/dashboard` -> `Direktur\DashboardController@index`.
 
-## Karyawan - Pengajuan Cuti
-- **List pengajuan**: Route GET `/karyawan/pengajuan_cuti` -> `Karyawan\PengajuanCutiController@index` -> list ajuan milik karyawan.
-- **Create pengajuan**: Route GET/POST `/karyawan/pengajuan_cuti/create` -> form & store -> `PengajuanCuti` table, status `pending_lead`.
-- **Filter pengajuan**: GET `/karyawan/pengajuan_cuti/disetujui`, `/karyawan/pengajuan_cuti/ditolak` -> list filter by status.
-- **Detail pengajuan**: Route GET `/karyawan/pengajuan_cuti/{id}` -> show detail + approval history via `RiwayatApprovalController`.
+## Karyawan - Workflow
+- **Dashboard**: View pengajuan, hak cuti, history approval.
+- **Create pengajuan**: Route POST `/karyawan/pengajuan_cuti/create` -> store -> status `pending_lead`.
+- **List pengajuan**: GET `/karyawan/pengajuan_cuti` -> list milik sendiri.
+- **Filter pengajuan**: `/karyawan/pengajuan_cuti/disetujui`, `/ditolak`.
+- **Detail pengajuan**: GET `/karyawan/pengajuan_cuti/{id}` -> show + approval history.
 
-## Lead - Pengajuan & Approval
-- **List karyawan**: Route GET `/lead/karyawan` -> `Lead\KaryawanController@index` -> list tim karyawan.
-- **List pengajuan**: Route GET `/lead/pengajuan_cuti` -> `Lead\PengajuanCutiController@index` -> list pending approval.
-- **Filter pengajuan**: GET `/lead/pengajuan_cuti/disetujui`, `/ditolak` -> list by status.
-- **Detail pengajuan**: Route GET `/lead/pengajuan_cuti/{id}` -> show detail.
-- **Approval list**: Route GET `/lead/approval_cuti` -> `Lead\ApprovalCutiController@index` -> list untuk di-approve.
-- **Filter approval**: GET `/lead/approval_cuti/pengajuan/disetujui`, `/ditolak`.
-- **Approve action**: Route POST `/lead/approval_cuti/{id}/setuju` -> update status + create approval_cuti record.
-- **Reject action**: Route POST `/lead/approval_cuti/{id}/tolak` -> update status ditolak + alasan penolakan.
+## Lead - Approval Workflow (Level 1)
+- **Dashboard**: Overview tim karyawan & pending approval.
+- **List karyawan**: GET `/lead/karyawan` -> view tim.
+- **List pengajuan**: GET `/lead/pengajuan_cuti` -> pengajuan dari tim karyawan.
+- **Filter pengajuan**: `/lead/pengajuan_cuti/disetujui`, `/ditolak`.
+- **Detail pengajuan**: GET `/lead/pengajuan_cuti/{id}`.
+- **Approval list**: GET `/lead/approval_cuti` -> list untuk di-approve.
+- **Approve action**: POST `/lead/approval_cuti/{id}/setuju` -> update status `pending_hrd`.
+- **Reject action**: POST `/lead/approval_cuti/{id}/tolak` -> update status `ditolak`.
 
-## Head - Pengajuan & Approval
-- **List karyawan**: Route GET `/head/karyawan` -> `Head\KaryawanController@index` (via `Hrd\HeadController`).
-- **List pengajuan**: Route GET `/head/pengajuan_cuti` -> `Head\PengajuanCutiController@index`.
-- **Filter pengajuan**: GET `/head/pengajuan_cuti/disetujui`, `/ditolak`.
-- **Approval list**: Route GET `/head/approval_cuti` -> `Head\ApprovalCutiController@index`.
-- **Filter approval**: GET `/head/approval_cuti/pengajuan/disetujui`, `/ditolak`.
-- **Approve action**: Route POST `/head/approval_cuti/{id}/setuju`.
-- **Reject action**: Route POST `/head/approval_cuti/{id}/tolak`.
+## Head - Approval Workflow (Level 3)
+- **Dashboard**: Overview pending approval.
+- **List karyawan**: GET `/head/karyawan` -> view tim (via HeadController).
+- **List pengajuan**: GET `/head/pengajuan_cuti` -> pengajuan status `pending_head`.
+- **Filter pengajuan**: `/head/pengajuan_cuti/disetujui`, `/ditolak`.
+- **Approval list**: GET `/head/approval_cuti` -> list untuk di-approve.
+- **Approve action**: POST `/head/approval_cuti/{id}/setuju` -> update status `pending_direktur`.
+- **Reject action**: POST `/head/approval_cuti/{id}/tolak` -> update status `ditolak`.
 
-## HRD - Master Data & Full Workflow
-- **Dashboard**: Route GET `/hrd/dashboard` -> overview.
-- **Master divisi**: Resource route `/hrd/divisi` -> `Hrd\DivisiController` (CRUD).
-- **Master karyawan**: Resource route `/hrd/karyawan` -> `Hrd\KaryawanController` (CRUD + role assign).
-- **Master jenis cuti**: Resource route `/hrd/jenis_cuti` -> `Hrd\JenisCutiController` (CRUD).
-- **Master hak cuti**: Resource route `/hrd/hak_cuti` -> `Hrd\HakCutiController` (CRUD).
-- **Master head/supervisor**: Resource route `/hrd/head` -> `Hrd\HeadController` (CRUD).
-- **List pengajuan cuti**: Route GET `/hrd/pengajuan_cuti` -> `Hrd\PengajuanCutiController@index` -> all pengajuan.
-- **Filter pengajuan**: GET `/hrd/pengajuan_cuti/disetujui`, `/ditolak`.
-- **Detail pengajuan**: Route GET `/hrd/pengajuan_cuti/{id}`.
-- **Approval list**: Route GET `/hrd/approval_cuti` -> `Hrd\ApprovalCutiController@index`.
-- **Filter approval**: GET `/hrd/approval_cuti/pengajuan/disetujui`, `/ditolak`.
-- **Approve action**: Route POST `/hrd/approval_cuti/{id}/setuju`.
-- **Reject action**: Route POST `/hrd/approval_cuti/{id}/tolak`.
-- **History cuti**: Route GET `/hrd/riwayat_cuti` -> `Hrd\RiwayatCutiController@index` -> riwayat approval cuti.
-- **History approval**: Route GET `/hrd/riwayat_approval` -> `Hrd\RiwayatApprovalController@index` -> audit trail approval.
+## HRD - Full Master Data & Approval Workflow (Level 2)
+- **Dashboard**: Overview semua cuti, pending approval.
+- **Master divisi**: Resource `/hrd/divisi` -> CRUD divisi.
+- **Master karyawan**: Resource `/hrd/karyawan` -> CRUD + role assign.
+- **Master jenis cuti**: Resource `/hrd/jenis_cuti` -> CRUD jenis cuti.
+- **Master hak cuti**: Resource `/hrd/hak_cuti` -> CRUD hak cuti.
+- **Master head/supervisor**: Resource `/hrd/head` -> CRUD head organisasi.
+- **List pengajuan**: GET `/hrd/pengajuan_cuti` -> semua pengajuan.
+- **Filter pengajuan**: `/hrd/pengajuan_cuti/disetujui`, `/ditolak`.
+- **Approval list**: GET `/hrd/approval_cuti` -> list untuk di-approve.
+- **Approve action**: POST `/hrd/approval_cuti/{id}/setuju` -> update status `pending_head`.
+- **Reject action**: POST `/hrd/approval_cuti/{id}/tolak` -> update status `ditolak`.
+- **History cuti**: GET `/hrd/riwayat_cuti` -> riwayat approval cuti semua karyawan.
+- **History approval**: GET `/hrd/riwayat_approval` -> audit trail approval (siapa approve kapan).
 
-## Direktur - Approval (Placeholder)
+## Direktur - Dashboard Only (Pending Implementation)
 - **Dashboard**: Route GET `/direktur/dashboard` -> view only.
-- **Approval workflow**: Belum terintegrasi (route belum ada).
+- **Approval workflow**: **BELUM TERINTEGRASI** - controller & view folder ada tapi route/action belum.
+- **Karyawan view**: Controller `DirekturController` punya index() untuk list karyawan (reuse HRD view).
+- **Blocker**: Butuh route POST untuk action setuju/tolak & business logic untuk update status `disetujui`.
 
 # Database Structure
 
@@ -77,248 +80,212 @@
 # Role & Permission Map
 
 - **Role**: `karyawan`, `lead`, `head`, `hrd`, `direktur`.
-- **Authorization**: Spatie Permission + middleware `role:[role]` di setiap route group.
+- **Authorization**: Spatie Permission `HasRoles` + middleware `role:[role]`.
 
 ## Privileges per Role
 - **Karyawan**: 
-  - Create/view pengajuan cuti sendiri.
-  - View history approval pengajuan.
-  - Filter: disetujui, ditolak.
+  - Create pengajuan cuti (status `pending_lead`).
+  - View pengajuan milik sendiri.
+  - Filter & view history approval.
   
 - **Lead**:
-  - View tim karyawan di divisi.
-  - List pengajuan cuti dari karyawan tim.
-  - Approve/reject pengajuan (level 1).
-  - Filter pengajuan: disetujui, ditolak.
+  - View karyawan di tim (divisi yang sama).
+  - List pengajuan dari tim (status `pending_lead`).
+  - Approve/reject -> geser ke `pending_hrd` atau `ditolak`.
+  - View history approval.
   
 - **Head**:
-  - View tim karyawan.
-  - List pengajuan cuti untuk approval (level 3).
-  - Approve/reject pengajuan.
-  - Filter pengajuan: disetujui, ditolak.
+  - View karyawan di organisasi.
+  - List pengajuan status `pending_head`.
+  - Approve/reject -> geser ke `pending_direktur` atau `ditolak`.
+  - View history approval.
   
 - **HRD**:
-  - Master data: divisi, karyawan, jenis cuti, hak cuti, head/supervisor.
-  - Assign role ke karyawan.
-  - List semua pengajuan cuti.
-  - Approve/reject pengajuan (level 2).
-  - View history cuti dan approval.
-  - Filter pengajuan: disetujui, ditolak.
+  - Master data full: divisi, karyawan, jenis_cuti, hak_cuti, head.
+  - List ALL pengajuan cuti.
+  - Approve/reject level 2 -> geser ke `pending_head` atau `ditolak`.
+  - View history cuti & approval (audit trail).
+  - Assign role ke user.
   
 - **Direktur**:
-  - Dashboard view (approval workflow belum terintegrasi).
+  - Dashboard view.
+  - **Approval workflow PENDING** (controller ada, route belum).
+  - Expected: Approve/reject level 4 -> `disetujui` atau `ditolak`.
 
 # Module Map
 
 ## Routes
-- `routes/web.php`: Guest welcome, auth (login/register/reset), profile, role-based dashboard, workflow routes per role.
-- `routes/auth.php`: Laravel Breeze auth standard.
+- `routes/web.php`: Guest landing (redirect login), auth, profile, all role-based workflow routes.
+- `routes/auth.php`: Laravel Breeze auth (login, register, password reset).
 
 ## Controllers (Role-based Structure)
 
 ### Karyawan/
-- `DashboardController.php`: Karyawan dashboard view.
-- `PengajuanCutiController.php`: Create pengajuan; list milik sendiri.
+- `DashboardController.php`: Karyawan dashboard.
+- `PengajuanCutiController.php`: Create/list/show pengajuan cuti.
 - `RiwayatApprovalController.php`: View history approval pengajuan.
 
 ### Lead/
-- `DashboardController.php`: Lead dashboard view.
-- `KaryawanController.php`: View karyawan di tim lead.
-- `PengajuanCutiController.php`: List pengajuan pending approval; filter disetujui/ditolak; show detail.
-- `ApprovalCutiController.php`: Index approval list; setuju/tolak action.
+- `DashboardController.php`: Lead dashboard.
+- `KaryawanController.php`: List tim karyawan.
+- `PengajuanCutiController.php`: List/show pengajuan pending lead approval.
+- `ApprovalCutiController.php`: Approval action (setuju/tolak).
 
 ### Head/
-- `DashboardController.php`: Head dashboard view.
-- `KaryawanController.php`: View karyawan di bawah head (via Hrd\HeadController).
-- `PengajuanCutiController.php`: List pengajuan; filter; show detail.
-- `ApprovalCutiController.php`: Index approval; setuju/tolak action.
+- `DashboardController.php`: Head dashboard.
+- `KaryawanController.php`: List tim (via HeadController).
+- `PengajuanCutiController.php`: List/show pengajuan pending head approval.
+- `ApprovalCutiController.php`: Approval action (setuju/tolak).
+
+### Direktur/
+- `DashboardController.php`: Direktur dashboard view.
+- `KaryawanController.php`: **STUB** - punya index() untuk list karyawan (reuse HRD view).
+- `ApprovalCutiController.php`: **NOT FOUND** - perlu dibuat untuk approve/reject.
 
 ### HRD/
-- `DashboardController.php`: HRD dashboard view.
+- `DashboardController.php`: HRD dashboard.
 - `DivisiController.php`: CRUD divisi.
 - `KaryawanController.php`: CRUD karyawan + role assign.
 - `JenisCutiController.php`: CRUD jenis cuti.
 - `HakCutiController.php`: CRUD hak cuti.
-- `HeadController.php`: CRUD head/supervisor.
-- `PengajuanCutiController.php`: List all pengajuan; filter; show detail.
-- `ApprovalCutiController.php`: Index approval; setuju/tolak action.
-- `RiwayatCutiController.php`: View history cuti.
-- `RiwayatApprovalController.php`: View history approval (audit trail).
-
-### Direktur/
-- `DashboardController.php`: Direktur dashboard view.
+- `HeadController.php`: CRUD head organisasi.
+- `PengajuanCutiController.php`: List/show pengajuan + approval.
+- `ApprovalCutiController.php`: Approval action (setuju/tolak).
+- `RiwayatCutiController.php`: History cuti.
+- `RiwayatApprovalController.php`: Audit trail approval.
 
 ### Standalone
-- `ProfileController.php`: Edit/update user profile.
+- `ProfileController.php`: Edit/update profile.
 
 ## Models
 - `User.php`: `HasRoles`, relasi Divisi, PengajuanCuti, HakCuti, ApprovalCuti.
-- `Divisi.php`: relasi `hasMany(User)`.
-- `JenisCuti.php`: relasi `hasMany(HakCuti)`, `hasMany(PengajuanCuti)`.
-- `HakCuti.php`: relasi `belongsTo(User)`, `belongsTo(JenisCuti)`.
-- `PengajuanCuti.php`: relasi `belongsTo(User)`, `belongsTo(JenisCuti)`, `hasMany(ApprovalCuti)`.
-- `ApprovalCuti.php`: relasi `belongsTo(PengajuanCuti)`, `belongsTo(User)`.
-- `Jabatan.php`: kosong, belum diintegrasikan.
+- `Divisi.php`, `JenisCuti.php`, `HakCuti.php`, `PengajuanCuti.php`, `ApprovalCuti.php`.
+- `Jabatan.php`: Kosong, belum diintegrasikan.
 
 ## Seeders
-- `RoleSeeder.php`: Seed 5 role (karyawan, lead, head, hrd, direktur).
-- `AdminSeeder.php`: Seed admin HRD (admin@nocoleave.com).
-- `DivisiSeeder.php`: Seed 10 divisi.
-- `JenisCutiSeeder.php`: Seed 9 jenis cuti.
-- `HakCutiSeeder.php`: Seed hak cuti per user (NEW).
+- `RoleSeeder.php`: 5 role.
+- `AdminSeeder.php`: Admin HRD default.
+- `DivisiSeeder.php`: 10 divisi.
+- `JenisCutiSeeder.php`: 9 jenis cuti.
+- `HakCutiSeeder.php`: Hak cuti per user.
 - `DatabaseSeeder.php`: Call semua seeder.
 
-## Views (Role-based Structure)
+## Views (Role-based)
 ### Karyawan/
-- `dashboard.blade.php`: Karyawan dashboard.
-- `pengajuan_cuti/`: index, create, show.
-- `riwayat_approval/`: index (history approval).
+- `dashboard.blade.php`, `pengajuan_cuti/` (index, create, show), `riwayat_approval/` (index).
 
 ### Lead/
-- `dashboard.blade.php`: Lead dashboard.
-- `karyawan/`: index (list tim).
-- `pengajuan_cuti/`: index, show, filter views.
-- `approval_cuti/`: index (approval list).
+- `dashboard.blade.php`, `karyawan/` (index), `pengajuan_cuti/` (index, show, filter), `approval_cuti/` (index).
 
 ### Head/
-- `dashboard.blade.php`: Head dashboard.
-- `karyawan/`: index (list tim).
-- `pengajuan_cuti/`: index, show, filter views.
-- `approval_cuti/`: index (approval list).
+- `dashboard.blade.php`, `karyawan/` (index), `pengajuan_cuti/` (index, show, filter), `approval_cuti/` (index).
 
 ### HRD/
-- `dashboard.blade.php`: HRD dashboard.
-- `divisi/`: index, create, edit.
-- `karyawan/`: index, create, edit.
-- `jenis_cuti/`: index, create, edit.
-- `hak_cuti/`: index, create, edit.
-- `head/`: index, create, edit.
-- `pengajuan_cuti/`: index, show, filter views.
-- `approval_cuti/`: index (approval list).
-- `riwayat_cuti/`: index.
-- `riwayat_approval/`: index (audit trail).
+- `dashboard.blade.php`, `divisi/`, `karyawan/`, `jenis_cuti/`, `hak_cuti/`, `head/`, `pengajuan_cuti/`, `approval_cuti/`, `riwayat_cuti/`, `riwayat_approval/`.
 
 ### Direktur/
-- `dashboard.blade.php`: Direktur dashboard view.
+- `dashboard.blade.php`, `approval_cuti/` (folder kosong, belum ada view).
 
 ### Standard
 - `auth/`: login, register, password reset (Breeze).
-- `profile/`: edit (standard Breeze).
-- `layouts/app.blade.php`: Main layout.
-- `welcome.blade.php`: Landing page.
+- `profile/`: edit profile.
+- `layouts/app.blade.php`, `welcome.blade.php`.
 
 # Workflow Approval Map
 
-**Flow Status Pengajuan:**
-1. Karyawan ajukan cuti (POST `/karyawan/pengajuan_cuti`) -> `status: pending_lead`, `current_approver_id: lead_id`.
-2. Lead approve (POST `/lead/approval_cuti/{id}/setuju`) -> `status: pending_hrd`, `current_approver_id: hrd_id`, create ApprovalCuti record.
-3. Lead reject (POST `/lead/approval_cuti/{id}/tolak`) -> `status: ditolak`, `ditolak_oleh: lead_id`, alasan.
-4. HRD approve (POST `/hrd/approval_cuti/{id}/setuju`) -> `status: pending_head`, `current_approver_id: head_id`.
-5. HRD reject -> `status: ditolak`, `ditolak_oleh: hrd_id`.
-6. Head approve (POST `/head/approval_cuti/{id}/setuju`) -> `status: pending_direktur`, `current_approver_id: direktur_id`.
-7. Head reject -> `status: ditolak`, `ditolak_oleh: head_id`.
-8. Direktur approve -> `status: disetujui`, `approved_at: now`.
-9. Direktur reject -> `status: ditolak`, `ditolak_oleh: direktur_id`.
+**Status Flow:**
+1. Karyawan ajukan -> `pending_lead` (current_approver_id = lead).
+2. Lead approve/reject -> `pending_hrd`/`ditolak`.
+3. HRD approve/reject -> `pending_head`/`ditolak`.
+4. Head approve/reject -> `pending_direktur`/`ditolak`.
+5. Direktur approve/reject -> `disetujui`/`ditolak` **[PENDING IMPLEMENTATION]**.
 
-**Approval Tracking:**
-- Setiap approval action create record di `ApprovalCuti` table (level_approval, status, catatan, approver_id).
-- History dapat dilihat di `RiwayatApprovalController` (karyawan) atau `HrdRiwayatApprovalController` (HRD).
+**Approval Records:**
+- Each action create `ApprovalCuti` record: (pengajuan_cuti_id, approver_id, level_approval, status, catatan, approved_at).
+
+**History Tracking:**
+- `Karyawan\RiwayatApprovalController`: Lihat history pengajuan milik sendiri.
+- `Hrd\RiwayatApprovalController`: Audit trail semua approval.
 
 # Implementation Status
 
-## ? COMPLETE
-- Role-based dashboard untuk semua role.
-- Master data HRD (divisi, karyawan, jenis_cuti, hak_cuti, head).
-- Karyawan pengajuan cuti & view riwayat.
-- Lead approval workflow (view karyawan, list pengajuan, approve/reject).
-- Head approval workflow (approve/reject).
-- HRD full workflow (list, approve/reject, history).
+## ? COMPLETE (95%)
+- Karyawan pengajuan & history view.
+- Lead level 1 approval workflow.
+- HRD level 2 approval workflow + master data.
+- Head level 3 approval workflow.
 - History tracking & audit trail.
+- Role-based dashboard semua role.
 
-## ?? PENDING / INCOMPLETE
-- Direktur approval route & action (dashboard only).
-- Email notification untuk approval action.
-- Batch approval/rejection.
-- Advanced filtering & export.
-- Automatic status update ke next approver (mungkin perlu delay atau email trigger).
+## ?? PENDING / INCOMPLETE (5%)
+- **Direktur level 4 approval**: Route & action untuk setuju/tolak.
+- **Direktur ApprovalCutiController**: Belum ada, perlu dibuat.
+- **Email notification**: Belum implementasi.
+- **Direktur view**: approval_cuti folder ada tapi kosong (no views).
+
+# Risks / Blind Spots
+
+- **Direktur workflow incomplete**: Route belum ada di web.php; controller `DirekturController` hanya stub.
+- **Direktur blocker**: Tanpa route/action, pengajuan macet di status `pending_direktur`.
+- **Email notification missing**: Approver tidak dapat notifikasi approval pending.
+- **Concurrent approval**: Tidak ada protection jika 2 orang approve simultaneously.
+- **API endpoint**: Semua web route; tidak ada REST API.
+- **Batch operation**: Tidak ada bulk approve/reject.
+- **Testing**: Unit/feature test belum ditemukan.
+- **Jabatan unused**: Model kosong, tidak dipakai.
+
+# Next Steps (Immediate)
+
+- [ ] Buat `Direktur\ApprovalCutiController` dengan method approve/reject.
+- [ ] Tambah route group untuk Direktur approval di `web.php`.
+- [ ] Buat view Direktur approval UI (`approval_cuti/index`, `show`, etc).
+- [ ] Implementasi Direktur action POST setuju/tolak.
+- [ ] Test end-to-end approval workflow (karyawan -> lead -> hrd -> head -> direktur -> disetujui).
+- [ ] **OPTIONAL**: Email notification service.
+
+# Key Observations
+
+1. **Nearly complete**: Hanya tinggal Direktur approval saja untuk workflow 100%.
+2. **Clean architecture**: Per-role controller organization memudahkan maintenance.
+3. **History tracking**: Audit trail lengkap untuk compliance.
+4. **Flexible status filter**: Semua role punya filter disetujui/ditolak.
+5. **Reusable views**: Direktur bisa reuse HRD karyawan view.
+6. **Landing redirect**: User non-auth langsung ke login (security improvement).
 
 # Clean Tree
 
 ```
 app/Http/Controllers/
-  Auth/
-    AuthenticatedSessionController.php
-    ConfirmablePasswordController.php
-    EmailVerificationNotificationController.php
-    EmailVerificationPromptController.php
-    NewPasswordController.php
-    PasswordController.php
-    PasswordResetLinkController.php
-    RegisteredUserController.php
-    VerifyEmailController.php
   Direktur/
-    DashboardController.php
+    DashboardController.php ?
+    KaryawanController.php ?? (stub only)
+    (ApprovalCutiController.php - MISSING) ?
   Head/
-    ApprovalCutiController.php
-    DashboardController.php
-    KaryawanController.php
-    PengajuanCutiController.php
+    DashboardController.php ?
+    KaryawanController.php ?
+    PengajuanCutiController.php ?
+    ApprovalCutiController.php ?
   Hrd/
-    ApprovalCutiController.php
-    DashboardController.php
-    DivisiController.php
-    HakCutiController.php
-    HeadController.php
-    JenisCutiController.php
-    KaryawanController.php
-    PengajuanCutiController.php
-    RiwayatApprovalController.php
-    RiwayatCutiController.php
+    DashboardController.php ?
+    DivisiController.php ?
+    KaryawanController.php ?
+    JenisCutiController.php ?
+    HakCutiController.php ?
+    HeadController.php ?
+    PengajuanCutiController.php ?
+    ApprovalCutiController.php ?
+    RiwayatCutiController.php ?
+    RiwayatApprovalController.php ?
   Karyawan/
-    DashboardController.php
-    PengajuanCutiController.php
-    RiwayatApprovalController.php
+    DashboardController.php ?
+    PengajuanCutiController.php ?
+    RiwayatApprovalController.php ?
   Lead/
-    ApprovalCutiController.php
-    DashboardController.php
-    KaryawanController.php
-    PengajuanCutiController.php
-  Controller.php
-  ProfileController.php
-
-app/Models/
-  ApprovalCuti.php
-  Divisi.php
-  HakCuti.php
-  Jabatan.php
-  JenisCuti.php
-  PengajuanCuti.php
-  User.php
-
-routes/
-  auth.php
-  web.php
-
-resources/views/
-  (per-role dashboard & workflow views)
+    DashboardController.php ?
+    KaryawanController.php ?
+    PengajuanCutiController.php ?
+    ApprovalCutiController.php ?
+  ProfileController.php ?
 ```
 
-# Key Observations
-
-1. **Workflow fully implemented**: Lead -> HRD -> Head approval chain working end-to-end.
-2. **History tracking**: Both riwayat_cuti dan riwayat_approval available for audit.
-3. **Filter by status**: Semua workflow page bisa filter disetujui/ditolak.
-4. **Detail view**: Setiap pengajuan punya detail view untuk lihat history approval.
-5. **Role separation**: Strict separation per-role dengan minimal cross-role visibility.
-6. **Direktur pending**: Direktur hanya punya dashboard, approval workflow belum terintegrasi.
-
-# Risks / Blind Spots
-
-- **Direktur workflow**: Route/action belum ada; workflow berhenti di Head.
-- **Automatic status push**: Apakah ada automasi untuk geser ke next approver atau manual polling?
-- **Email notification**: Belum ada implementasi (no notification service di seeders/config).
-- **Batch operation**: Tidak ada bulk approve/reject.
-- **API endpoint**: Semua via web route; tidak ada REST API.
-- **Testing**: Unit/feature test belum ditemukan.
-- **Concurrent approval**: Bagaimana jika 2 approver approve simultaneously?
-- **Direktur integration**: Harus implementasi approval route & action untuk Direktur.
+**Legend**: ? Complete | ?? Incomplete | ? Missing

@@ -26,18 +26,42 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
         {{-- Card Header --}}
-        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
                 <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuanCuti->total() }} pengajuan</p>
             </div>
-            <a href="{{ route('head.pengajuan_cuti.create') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Ajukan Cuti
-            </a> 
+            <div class="flex flex-wrap items-center gap-3">
+                {{-- Form Filter Jenis Cuti --}}
+                <form action="{{ route('head.pengajuan_cuti.index') }}" method="GET" class="flex items-center gap-2">
+                    <select name="jenis_cuti_id" onchange="this.form.submit()"
+                        class="rounded-xl border-gray-200 text-sm focus:border-cyan-500 focus:ring-cyan-500 py-2 pl-3 pr-10 text-gray-700">
+                        <option value="">Semua Jenis Cuti</option>
+                        @foreach($jenisCutiList as $jenis)
+                            <option value="{{ $jenis->id }}" {{ request('jenis_cuti_id') == $jenis->id ? 'selected' : '' }}>
+                                {{ $jenis->nama_cuti }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if(request()->filled('jenis_cuti_id'))
+                        <a href="{{ route('head.pengajuan_cuti.index') }}" 
+                            class="inline-flex items-center justify-center p-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                            title="Reset Filter">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </form>
+
+                <a href="{{ route('head.pengajuan_cuti.create') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Ajukan Cuti
+                </a>
+            </div>
         </div>
 
         {{-- Table --}}
@@ -47,13 +71,14 @@
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-100">
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">No</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th>
+                        <!-- <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th> -->
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Jenis Cuti</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Mulai</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Selesai</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Masuk</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Jumlah Hari</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -62,9 +87,9 @@
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                             {{ $pengajuanCuti->firstItem() + $index }}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                        <!-- <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                             {{ $item->user->name }}
-                        </td>
+                        </td> -->
                         <td class="px-6 py-4 text-sm text-gray-600">
                             <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
                                 {{ $item->jenisCuti->nama_cuti }}
@@ -76,10 +101,13 @@
                         <td class="px-6 py-4 text-sm text-gray-600">
                             {{ $item->tanggal_selesai->format('d M Y') }}
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            {{ $item->tanggal_masuk->format('d M Y') }}
+                        </td>
                         <td class="px-6 py-4 text-sm text-gray-900 font-semibold text-center">
                             {{ $item->jumlah_hari }} hari
                         </td>
-                        <td class="px-6 py-4 text-sm">
+                        <td class="px-6 py-4 text-sm text-gray-900 font-semibold text-center">
                             @php
                             $statusConfig = [
                             'pending_lead' => ['bg' => 'bg-yellow-50', 'text' => 'text-yellow-700', 'label' => 'Pending Lead'],
@@ -91,15 +119,42 @@
                             ];
                             $config = $statusConfig[$item->status] ?? ['bg' => 'bg-gray-50', 'text' => 'text-gray-700', 'label' => ucfirst($item->status)];
                             @endphp
-                            <span class="px-3 py-1 rounded-full {{ $config['bg'] }} {{ $config['text'] }} text-xs font-semibold">
+                            <span class="px-3 py-1 rounded-full whitespace-nowrap {{ $config['bg'] }} {{ $config['text'] }} text-xs text-center font-semibold">
                                 {{ $config['label'] }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm">
-                            <a href="{{ route('head.pengajuan_cuti.show', $item->id) }}"
-                                class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
-                                Detail
-                            </a>
+                        <td class="px-6 py-4 text-sm ite">
+                            <div class="flex justify-center items-center gap-2">
+
+                                <a href="{{ route('head.pengajuan_cuti.show', $item->id) }}"
+                                    class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-xs font-semibold">
+                                    Detail
+                                </a>
+
+                                @if($item->status == 'pending_hrd')
+
+                                <a href="{{ route('head.pengajuan_cuti.edit', $item->id) }}"
+                                    class="bg-yellow-100 text-yellow-700 px-3 py-2 rounded-lg text-xs">
+                                    Edit
+                                </a>
+
+                                <form action="{{ route('head.pengajuan_cuti.destroy', $item->id) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Yakin ingin menghapus pengajuan ini?')">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit"
+                                        class="bg-red-100 text-red-700 px-3 py-2 rounded-lg text-xs">
+                                        Hapus
+                                    </button>
+
+                                </form>
+
+                                @endif
+
+                            </div>
                         </td>
                     </tr>
                     @empty

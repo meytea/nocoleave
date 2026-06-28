@@ -26,9 +26,7 @@ class KaryawanController extends Controller
         return view('hrd.karyawan.index', compact('karyawan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    //
     public function create()
     {
         $divisi = Divisi::all();
@@ -59,6 +57,7 @@ class KaryawanController extends Controller
             'nik' => $validated['nik'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
             'divisi_id' => $validated['divisi_id'],
+            'foto' => 'images/default_profile.jpg',
             'is_active' => true,
         ]);
 
@@ -75,9 +74,12 @@ class KaryawanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $karyawan)
     {
-        //
+        return view(
+            'hrd.karyawan.detail',
+            compact('karyawan')
+        );
     }
 
     /**
@@ -97,6 +99,7 @@ class KaryawanController extends Controller
      */
     public function update(Request $request, User $karyawan)
     {
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $karyawan->id,
@@ -104,7 +107,17 @@ class KaryawanController extends Controller
             'jenis_kelamin' => 'required',
             'divisi_id' => 'nullable|exists:divisi,id',
             'role' => 'required',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('foto')) {
+
+            $foto = $request->file('foto')
+                ->store('karyawan', 'public');
+
+            $karyawan->foto = $foto;
+            $karyawan->save();
+        }
 
         $karyawan->update([
             'name' => $validated['name'],

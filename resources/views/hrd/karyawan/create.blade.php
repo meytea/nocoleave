@@ -15,6 +15,15 @@
               class="space-y-6">
 
             @csrf
+            @if ($errors->any())
+    <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-xl">
+        <ul class="list-disc pl-5">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 

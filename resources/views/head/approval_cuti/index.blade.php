@@ -5,8 +5,8 @@
 <div class="space-y-8">
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Pengajuan Cuti</h1>
-        <p class="text-gray-600 mt-2">Kelola pengajuan cuti Anda</p>
+        <h1 class="text-4xl font-bold text-gray-900">Data Pengajuan Cuti</h1>
+        <p class="text-gray-600 mt-2"></p>
     </div>
 
     {{-- Success Message --}}
@@ -31,13 +31,7 @@
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
                 <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuan_cuti->total() }} pengajuan</p>
             </div>
-            <a href="#"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Ajukan Cuti
-            </a>
+            
         </div>
 
         {{-- Table --}}
@@ -155,15 +149,9 @@
                                 </svg>
                                 <div>
                                     <p class="text-gray-600 font-medium">Belum ada pengajuan cuti</p>
-                                    <p class="text-sm text-gray-500 mt-1">Mulai buat pengajuan cuti pertama Anda</p>
+                                    
                                 </div>
-                                <a href="#"
-                                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Ajukan Cuti
-                                </a>
+                                
                             </div>
                         </td>
                     </tr>
@@ -228,15 +216,9 @@
                 </svg>
                 <div>
                     <p class="text-gray-900 font-bold text-lg">Belum ada pengajuan cuti</p>
-                    <p class="text-sm text-gray-600 mt-2">Anda belum membuat pengajuan cuti apapun. Mulai buat pengajuan pertama Anda sekarang.</p>
+                    
                 </div>
-                <a href="#"
-                    class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajukan Cuti
-                </a>
+               
             </div>
         </div>
         @endif

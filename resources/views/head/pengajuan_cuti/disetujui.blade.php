@@ -30,6 +30,28 @@
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti Disetujui</h2>
                 <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuanCuti->total() }} pengajuan</p>
             </div>
+
+            {{-- Form Filter Jenis Cuti --}}
+                <form action="{{ route('head.pengajuan_cuti.disetujui') }}" method="GET" class="flex items-center gap-2">
+                    <select name="jenis_cuti_id" onchange="this.form.submit()"
+                        class="rounded-xl border-gray-200 text-sm focus:border-cyan-500 focus:ring-cyan-500 py-2 pl-3 pr-10 text-gray-700">
+                        <option value="">Semua Jenis Cuti</option>
+                        @foreach($jenisCutiList as $jenis)
+                            <option value="{{ $jenis->id }}" {{ request('jenis_cuti_id') == $jenis->id ? 'selected' : '' }}>
+                                {{ $jenis->nama_cuti }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if(request()->filled('jenis_cuti_id'))
+                        <a href="{{ route('head.pengajuan_cuti.disetujui') }}" 
+                            class="inline-flex items-center justify-center p-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                            title="Reset Filter">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </form>
         </div>
 
         {{-- Table --}}

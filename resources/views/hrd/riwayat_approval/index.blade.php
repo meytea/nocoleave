@@ -59,7 +59,13 @@
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ $item->approver->name ?? '-' }}
+                            <div class="font-medium">
+                                {{ $item->approver->name ?? '-' }}
+                            </div>
+
+                            <div class="text-xs text-gray-500">
+                                {{ $item->approver->roles->first()->name ?? '-' }}
+                            </div>
                         </td>
 
                         <td class="px-6 py-4 text-center">

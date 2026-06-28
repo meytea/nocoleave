@@ -5,8 +5,8 @@
 <div class="space-y-8">
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Pengajuan Cuti</h1>
-        <p class="text-gray-600 mt-2">Kelola pengajuan cuti Anda</p>
+        <h1 class="text-4xl font-bold text-gray-900">Data Pengajuan Cuti</h1>
+        <p class="text-gray-600 mt-2"></p>
     </div>
 
     {{-- Success Message --}}
@@ -29,57 +29,79 @@
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
-                <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuan_cuti->total() }} pengajuan</p>
+                <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuanCuti->total() }} pengajuan</p>
             </div>
-            <a href="#"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Ajukan Cuti
-            </a>
+
+            <form method="GET" id="searchForm">
+
+                <div class="relative w-full max-w-md">
+
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <x-heroicon-o-magnifying-glass
+                            class="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari nama, jabatan, divisi, jenis cuti..."
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                </div>
+
+            </form>
+
         </div>
 
         {{-- Table --}}
-        @if($pengajuan_cuti->count() > 0)
+        @if($pengajuanCuti->count() > 0)
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-100">
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">No</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Jenis Cuti</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Mulai</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Selesai</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Jumlah Hari</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">No</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Jabatan</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Divisi</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Jenis Cuti</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Mulai</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Selesai</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse($pengajuan_cuti as $index => $item)
+                    @forelse($pengajuanCuti as $index => $item)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">
-                            {{ $pengajuan_cuti->firstItem() + $index }}
+                        <td class="px-6 py-4 text-sm text-center text-gray-900 font-medium">
+                            {{ $pengajuanCuti->firstItem() + $index }}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                        <td class="px-6 py-4 text-sm text-center text-gray-900 font-medium">
                             {{ $item->user->name }}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
+                        <td class="px-6 py-4 text-sm text-center text-gray-600">
+                            {{ ucfirst($item->user->roles->first()?->name ?? '-') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-center text-gray-900 font-medium">
+                            {{ $item->user->divisi->nama_divisi ?? '-' }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-center text-gray-600">
                             <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
                                 {{ $item->jenisCuti->nama_cuti }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
+                        <td class="px-6 py-4 text-sm text-center text-gray-600">
                             {{ $item->tanggal_mulai->format('d M Y') }}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
+                        <td class="px-6 py-4 text-sm text-center text-gray-600">
                             {{ $item->tanggal_selesai->format('d M Y') }}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 font-semibold text-center">
+                        <!-- <td class="px-6 py-4 text-sm text-center text-gray-900 font-semibold text-center">
                             {{ $item->jumlah_hari }} hari
-                        </td>
-                        <td class="px-6 py-4 text-sm">
+                        </td> -->
+                        <td class="px-6 py-4 text-sm text-center">
                             @php
                             $statusConfig = [
                             'pending_lead' => ['bg' => 'bg-yellow-50', 'text' => 'text-yellow-700', 'label' => 'Pending Lead'],
@@ -91,7 +113,7 @@
                             ];
                             $config = $statusConfig[$item->status] ?? ['bg' => 'bg-gray-50', 'text' => 'text-gray-700', 'label' => ucfirst($item->status)];
                             @endphp
-                            <span class="px-3 py-1 rounded-full {{ $config['bg'] }} {{ $config['text'] }} text-xs font-semibold">
+                            <span class="px-3 py-1 rounded-full whitespace-nowrap {{ $config['bg'] }} {{ $config['text'] }} text-xs font-semibold">
                                 {{ $config['label'] }}
                             </span>
                         </td>
@@ -110,20 +132,17 @@
                                         Setujui
                                     </button>
                                 </form>
-                                 <button type="button"
+                                <button type="button"
                                     onclick="openRejectModal({{ $item->id }})"
                                     class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-xs font-semibold">
 
                                     Tolak
 
                                 </button>
-                                <a href="#"
+                                <a href="{{ route('hrd.approval_cuti.show', $item->id) }}"
                                     class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Detail
                                 </a>
-
-
-
                             </div>
 
                         </td>
@@ -137,16 +156,7 @@
                                 </svg>
                                 <div>
                                     <p class="text-gray-600 font-medium">Belum ada pengajuan cuti</p>
-                                    <p class="text-sm text-gray-500 mt-1">Mulai buat pengajuan cuti pertama Anda</p>
                                 </div>
-                                <a href="#"
-                                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Ajukan Cuti
-                                </a>
-                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -155,30 +165,30 @@
         </div>
 
         {{-- Pagination --}}
-        @if($pengajuan_cuti->hasPages())
+        @if($pengajuanCuti->hasPages())
         <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
             <p class="text-sm text-gray-600">
                 Menampilkan
-                <span class="font-semibold">{{ $pengajuan_cuti->firstItem() }}</span>
+                <span class="font-semibold">{{ $pengajuanCuti->firstItem() }}</span>
                 hingga
-                <span class="font-semibold">{{ $pengajuan_cuti->lastItem() }}</span>
+                <span class="font-semibold">{{ $pengajuanCuti->lastItem() }}</span>
                 dari
-                <span class="font-semibold">{{ $pengajuan_cuti->total() }}</span>
+                <span class="font-semibold">{{ $pengajuanCuti->total() }}</span>
             </p>
             <div class="flex gap-1">
                 {{-- Previous Link --}}
-                @if ($pengajuan_cuti->onFirstPage())
+                @if ($pengajuanCuti->onFirstPage())
                 <span class="px-3 py-2 rounded-lg text-gray-400 bg-gray-100 text-sm font-medium cursor-not-allowed">← Sebelumnya</span>
                 @else
-                <a href="{{ $pengajuan_cuti->previousPageUrl() }}"
+                <a href="{{ $pengajuanCuti->previousPageUrl() }}"
                     class="px-3 py-2 rounded-lg text-gray-700 bg-white border border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors">
                     ← Sebelumnya
                 </a>
                 @endif
 
                 {{-- Page Numbers --}}
-                @foreach ($pengajuan_cuti->getUrlRange(1, $pengajuan_cuti->lastPage()) as $page => $url)
-                @if ($page == $pengajuan_cuti->currentPage())
+                @foreach ($pengajuanCuti->getUrlRange(1, $pengajuanCuti->lastPage()) as $page => $url)
+                @if ($page == $pengajuanCuti->currentPage())
                 <span class="px-3 py-2 rounded-lg bg-cyan-600 text-white text-sm font-medium">{{ $page }}</span>
                 @else
                 <a href="{{ $url }}"
@@ -189,8 +199,8 @@
                 @endforeach
 
                 {{-- Next Link --}}
-                @if ($pengajuan_cuti->hasMorePages())
-                <a href="{{ $pengajuan_cuti->nextPageUrl() }}"
+                @if ($pengajuanCuti->hasMorePages())
+                <a href="{{ $pengajuanCuti->nextPageUrl() }}"
                     class="px-3 py-2 rounded-lg text-gray-700 bg-white border border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors">
                     Selanjutnya →
                 </a>
@@ -210,15 +220,7 @@
                 </svg>
                 <div>
                     <p class="text-gray-900 font-bold text-lg">Belum ada pengajuan cuti</p>
-                    <p class="text-sm text-gray-600 mt-2">Anda belum membuat pengajuan cuti apapun. Mulai buat pengajuan pertama Anda sekarang.</p>
                 </div>
-                <a href="#"
-                    class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajukan Cuti
-                </a>
             </div>
         </div>
         @endif
@@ -287,5 +289,18 @@
             .getElementById('rejectModal')
             .classList.add('hidden');
     }
+
+    let timer;
+
+    document.getElementById('search').addEventListener('keyup', function() {
+
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            document.getElementById('searchForm').submit();
+        }, 500);
+
+    });
+
 </script>
 @endsection

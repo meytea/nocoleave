@@ -15,6 +15,7 @@ class PengajuanCuti extends Model
         'jenis_cuti_id',
         'tanggal_mulai',
         'tanggal_selesai',
+        'tanggal_masuk',
         'jumlah_hari',
         'alasan',
         'status',

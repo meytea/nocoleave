@@ -14,7 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 
-class DirekturController extends Controller
+class KaryawanController extends Controller
 {
     /**
      * Display a listing of the resource.

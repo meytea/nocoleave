@@ -28,73 +28,73 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
 
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
-        Detail Pengajuan Cuti
-    </h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+            Detail Pengajuan Cuti
+        </h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        <div>
-            <p class="text-sm text-gray-500">Jenis Cuti</p>
-            <p class="font-semibold">
-                {{ $pengajuanCuti->jenisCuti->nama_cuti }}
-            </p>
+            <div>
+                <p class="text-sm text-gray-500">Jenis Cuti</p>
+                <p class="font-semibold">
+                    {{ $pengajuanCuti->jenisCuti->nama_cuti }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">Status</p>
+                <p class="font-semibold">
+                    {{ $pengajuanCuti->status }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">Tanggal Mulai</p>
+                <p class="font-semibold">
+                    {{ $pengajuanCuti->tanggal_mulai?->format('d M Y') ?? '-' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">Tanggal Selesai</p>
+                <p class="font-semibold">
+                    {{ $pengajuanCuti->tanggal_selesai?->format('d M Y') ?? '-' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">Jumlah Hari</p>
+                <p class="font-semibold">
+                    {{ $pengajuanCuti->jumlah_hari }} Hari
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">Tanggal Masuk</p>
+                <p class="font-semibold">
+                    {{ $pengajuanCuti->tanggal_masuk?->format('d M Y') ?? '-' }}
+                </p>
+            </div>
+
         </div>
 
-        <div>
-            <p class="text-sm text-gray-500">Status</p>
-            <p class="font-semibold">
-                {{ $pengajuanCuti->status }}
-            </p>
-        </div>
+        <div class="mt-4">
 
-        <div>
-            <p class="text-sm text-gray-500">Tanggal Mulai</p>
-            <p class="font-semibold">
-                {{ $pengajuanCuti->tanggal_mulai }}
+            <p class="text-sm text-gray-500">
+                Alasan
             </p>
-        </div>
 
-        <div>
-            <p class="text-sm text-gray-500">Tanggal Selesai</p>
-            <p class="font-semibold">
-                {{ $pengajuanCuti->tanggal_selesai }}
+            <p class="font-medium">
+                {{ $pengajuanCuti->alasan }}
             </p>
-        </div>
 
-        <div>
-            <p class="text-sm text-gray-500">Jumlah Hari</p>
-            <p class="font-semibold">
-                {{ $pengajuanCuti->jumlah_hari }} Hari
-            </p>
-        </div>
-
-        <div>
-            <p class="text-sm text-gray-500">Tanggal Masuk</p>
-            <p class="font-semibold">
-                {{ $pengajuanCuti->tanggal_masuk }}
-            </p>
         </div>
 
     </div>
-
-    <div class="mt-4">
-
-        <p class="text-sm text-gray-500">
-            Alasan
-        </p>
-
-        <p class="font-medium">
-            {{ $pengajuanCuti->alasan }}
-        </p>
-
-    </div>
-
-</div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-    
+
 
         <div class="overflow-x-auto">
 
@@ -185,7 +185,7 @@
 
     </div>
 
-    
+
 
 </div>
 

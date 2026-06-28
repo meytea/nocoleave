@@ -27,6 +27,9 @@ return new class extends Migration
 
             $table->date('tanggal_selesai');
 
+            $table->date('tanggal_masuk')
+                ->nullable();
+
             $table->integer('jumlah_hari');
 
             $table->text('alasan');
