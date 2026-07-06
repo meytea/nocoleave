@@ -10,14 +10,50 @@ use Illuminate\Http\Request;
 
 class HeadController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $heads = Head::with([
             'user',
             'divisi'
         ])
-        ->latest()
-        ->paginate(10);
+            ->when($request->search, function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    // Nama Departemen
+                    $q->where(
+                        'nama_departemen',
+                        'like',
+                        "%{$search}%"
+                    )
+
+                        // Nama Head
+                        ->orWhereHas('user', function ($user) use ($search) {
+
+                            $user->where(
+                                'name',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        // Nama Divisi
+                        ->orWhereHas('divisi', function ($divisi) use ($search) {
+
+                            $divisi->where(
+                                'nama_divisi',
+                                'like',
+                                "%{$search}%"
+                            );
+                        });
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('hrd.head.index', compact('heads'));
     }
@@ -41,8 +77,9 @@ class HeadController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id'   => 'required|exists:users,id',
-            'divisi_id' => 'required|exists:divisi,id',
+            'user_id'           => 'required|exists:users,id',
+            'nama_departemen'   => 'required|string|max:255',
+            'divisi_id'         => 'required|exists:divisi,id',
         ]);
 
         Head::create($validated);
@@ -77,8 +114,9 @@ class HeadController extends Controller
         Head $head
     ) {
         $validated = $request->validate([
-            'user_id'   => 'required|exists:users,id',
-            'divisi_id' => 'required|exists:divisi,id',
+            'user_id'           => 'required|exists:users,id',
+            'nama_departemen'   => 'required|string|max:255',
+            'divisi_id'         => 'required|exists:divisi,id',
         ]);
 
         $head->update($validated);

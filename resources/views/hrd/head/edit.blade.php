@@ -19,6 +19,27 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+
+                <div>
+
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Nama Departemen
+                    </label>
+
+                    <input
+                        type="text"
+                        name="nama_departemen"
+                        value="{{ old('nama_departemen', $head->nama_departemen) }}"
+                        class="w-full rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                    @error('nama_departemen')
+                    <p class="mt-2 text-sm text-red-500">
+                        {{ $message }}
+                    </p>
+                    @enderror
+
+                </div>
+                
                 {{-- User Head --}}
                 <div>
 

@@ -135,6 +135,13 @@ class ApprovalCutiController extends Controller
                     ->where('status', 'disetujui');
             })
 
+            ->when($request->get('status') === 'sedang_cuti', function ($query) {
+
+                $query->where('status', 'disetujui')
+                    ->whereDate('tanggal_mulai', '<=', today())
+                    ->whereDate('tanggal_selesai', '>=', today());
+            })
+
             ->when($request->search, function ($query) use ($request) {
 
                 $search = $request->search;

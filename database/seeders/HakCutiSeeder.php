@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\JenisCuti;
 use App\Models\HakCuti;
+use App\Models\JenisCuti;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class HakCutiSeeder extends Seeder
 {
@@ -14,12 +14,23 @@ class HakCutiSeeder extends Seeder
      */
     public function run(): void
     {
-        $jenisCutiList = JenisCuti::all();
-        $karyawanUsers = User::role('hrd')->get();
         $tahun = now()->year;
 
-        foreach ($karyawanUsers as $user) {
-            foreach ($jenisCutiList as $jenisCuti) {
+        // Ambil hanya jenis cuti tahunan
+        $jenisCutiTahunan = JenisCuti::where('is_tahunan', true)->get();
+
+        // User yang berhak memiliki hak cuti
+        $users = User::role([
+            'karyawan',
+            'lead',
+            'head',
+            'hrd',
+        ])->get();
+
+        foreach ($users as $user) {
+
+            foreach ($jenisCutiTahunan as $jenisCuti) {
+
                 HakCuti::firstOrCreate(
                     [
                         'user_id' => $user->id,
@@ -27,8 +38,8 @@ class HakCutiSeeder extends Seeder
                         'tahun' => $tahun,
                     ],
                     [
-                        'sisa' => $jenisCuti->kuota ?? 0,
                         'terpakai' => 0,
+                        'sisa' => $jenisCuti->kuota,
                     ]
                 );
             }

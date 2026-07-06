@@ -6,11 +6,11 @@
 
     <div>
         <h1 class="text-3xl font-bold text-gray-800">
-            Riwayat Approval Cuti
+            Detail Pengajuan Cuti
         </h1>
 
         <p class="mt-1 text-gray-500">
-            Riwayat persetujuan dan penolakan pengajuan cuti.
+            Menampilkan detail pengajuan cuti serta riwayat proses persetujuan hingga status pengajuan saat ini.
         </p>
 
 
@@ -25,15 +25,15 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
 
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
+        <!-- <h2 class="text-xl font-bold text-gray-800 mb-4">
             Detail Pengajuan Cuti
-        </h2>
-        
+        </h2> -->
+
         <!-- Stepper -->
         <div class="mb-6">
 
             <div class="flex items-start justify-between relative">
-                
+
 
                 @foreach($workflow as $index => $step)
 
@@ -78,16 +78,18 @@
 
                         <!-- Icon Stepper -->
                         @if($rejectedStep !== null && $index == $rejectedStep)
-                            <x-heroicon-s-x-mark class="w-5 h-5" />
-                        @elseif($index < $rejectedStep)
+                        <x-heroicon-s-x-mark class="w-5 h-5" />
+                        @elseif($index
+                        < $rejectedStep)
                             <x-heroicon-s-check class="w-5 h-5" />
-                        @elseif($index < $currentStep)
+                        @elseif($index
+                        < $currentStep)
                             <x-heroicon-s-check class="w-5 h-5" />
                         @elseif($index == $currentStep)
-                            <x-heroicon-s-clock class="w-5 h-5" />
+                        <x-heroicon-s-clock class="w-5 h-5" />
                         @else
-                            <x-heroicon-o-minus class="w-5 h-5" />
-                        @endif  
+                        <x-heroicon-o-minus class="w-5 h-5" />
+                        @endif
                     </div>
 
                     <span class="mt-3 text-sm font-medium text-gray-700">
@@ -263,7 +265,12 @@
 
     </div>
     <div class="flex justify-end">
-        <a href="{{ route('karyawan.pengajuan_cuti.index') }}"
+        <!-- <a href="{{ route('karyawan.pengajuan_cuti.index') }}"
+            class="inline-block mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
+            Kembali
+        </a> -->
+
+        <a href="{{ url()->previous() }}"
             class="inline-block mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
             Kembali
         </a>

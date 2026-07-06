@@ -5,8 +5,8 @@
 <div class="space-y-8">
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Data Pengajuan Cuti</h1>
-        <p class="text-gray-600 mt-2"></p>
+        <h1 class="text-4xl font-bold text-gray-900"> Approval Cuti</h1>
+        <p class="text-gray-600 mt-2">Menampilkan daftar pengajuan cuti yang menunggu persetujuan.</p>
     </div>
 
     {{-- Success Message --}}
@@ -28,7 +28,7 @@
         {{-- Card Header --}}
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
             <div>
-                <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
+                <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti Disetujui</h2>
                 <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuanCuti->total() }} pengajuan</p>
             </div>
 
@@ -46,7 +46,7 @@
                         name="search"
                         id="search"
                         value="{{ request('search') }}"
-                        placeholder="Cari nama, jabatan, divisi, jenis cuti..."
+                        placeholder="Cari..."
                         class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
 
                 </div>
@@ -301,6 +301,5 @@
         }, 500);
 
     });
-
 </script>
 @endsection

@@ -6,8 +6,13 @@
 
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Dashboard Karyawan</h1>
-        <p class="text-gray-600 mt-2">Selamat Datang</p>
+        <h1 class="text-4xl font-bold text-gray-900">
+            Selamat Datang, {{ Auth::user()->name }}
+        </h1>
+
+        <p class="text-gray-600 mt-2">
+            Selamat datang di Dashboard Direktur.
+        </p>
     </div>
 
     {{-- STATISTICS CARDS --}}
@@ -15,6 +20,8 @@
 
         {{-- Sisa Cuti Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+             <a href="{{ route('direktur.karyawan.index') }}"
+                class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-600 text-sm font-medium">Total Karyawan Aktif</p>
@@ -31,12 +38,15 @@
                     </div>
                 </div>
             </div>
+             </a>
         </div>
 
 
 
         {{--Sedang Cuti Hari Ini Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+             <a href="{{ route('direktur.riwayat_cuti.index') }}"
+                class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-600 text-sm font-medium">
@@ -56,10 +66,13 @@
                     <x-heroicon-o-calendar-days class="w-8 h-8 text-green-600" />
                 </div>
             </div>
+             </a>
         </div>
 
         {{-- Pending Approval --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+             <a href="#"
+                class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-600 text-sm font-medium">
@@ -79,6 +92,7 @@
                     <x-heroicon-o-clock class="w-8 h-8 text-yellow-600" />
                 </div>
             </div>
+             </a>
         </div>
     </div>
     {{-- TABLE CARD --}}
@@ -209,7 +223,7 @@
                                     Tolak
 
                                 </button>
-                                <a href="#"
+                                <a href="{{ route('direktur.approval_cuti.show', $item->id) }}"
                                     class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Detail
                                 </a>

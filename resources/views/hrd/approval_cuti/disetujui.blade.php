@@ -5,7 +5,7 @@
 <div class="space-y-8">
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Pengajuan Cuti Disetujui</h1>
+        <h1 class="text-4xl font-bold text-gray-900">Approval Cuti Disetujui</h1>
     </div>
 
     {{-- Success Message --}}
@@ -20,7 +20,9 @@
         </div>
     </div>
     @endif
+    
 
+    @endif
     {{-- TABLE CARD --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
@@ -44,7 +46,7 @@
                         name="search"
                         id="search"
                         value="{{ request('search') }}"
-                        placeholder="Cari nama, jabatan, divisi, jenis cuti..."
+                        placeholder="Cari..."
                         class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
 
                 </div>
@@ -82,7 +84,7 @@
                             {{ $item->user->roles->first()->name }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $item->user->divisi->nama_divisi }}
+                            {{ $item->user->divisi?->nama_divisi ?? '-' }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
                             <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
@@ -95,7 +97,7 @@
                         <td class="px-6 py-4 text-sm text-gray-600">
                             {{ $item->tanggal_selesai->format('d M Y') }}
                         </td>
-                        
+
                         <td class="px-6 py-4 text-sm">
                             @php
                             $statusConfig = [
@@ -136,15 +138,9 @@
                                 </svg>
                                 <div>
                                     <p class="text-gray-600 font-medium">Belum ada pengajuan cuti</p>
-                                    <p class="text-sm text-gray-500 mt-1">Mulai buat pengajuan cuti pertama Anda</p>
+                                    
                                 </div>
-                                <a href="#"
-                                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Ajukan Cuti
-                                </a>
+                                
                             </div>
                         </td>
                     </tr>
@@ -209,15 +205,9 @@
                 </svg>
                 <div>
                     <p class="text-gray-900 font-bold text-lg">Belum ada pengajuan cuti</p>
-                    <p class="text-sm text-gray-600 mt-2">Anda belum membuat pengajuan cuti apapun. Mulai buat pengajuan pertama Anda sekarang.</p>
+                    
                 </div>
-                <a href="#"
-                    class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajukan Cuti
-                </a>
+                
             </div>
         </div>
         @endif
@@ -227,8 +217,6 @@
 </div>
 
 <script>
-    
-
     let timer;
 
     document.getElementById('search').addEventListener('keyup', function() {
@@ -240,7 +228,6 @@
         }, 500);
 
     });
-
 </script>
 
 @endsection

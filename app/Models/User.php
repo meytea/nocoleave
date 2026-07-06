@@ -71,4 +71,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(HakCuti::class);
     }
+
+    public function headDivisi()
+{
+    return $this->hasMany(Head::class, 'user_id');
+}
+
+public function head()
+{
+    return $this->hasOne(Head::class, 'user_id');
+}
 }

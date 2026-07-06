@@ -14,9 +14,7 @@ use App\Models\ApprovalCuti;
 
 class PengajuanCutiController extends Controller
 {
-    /**
-     * Display a listing of pengajuan cuti milik user login
-     */
+    
     public function index(Request $request)
     {
         // Mengambil data user yang sedang login
@@ -103,7 +101,7 @@ class PengajuanCutiController extends Controller
         $tanggalMasukCalculated = $this->calculateTanggalMasuk($validated['tanggal_selesai']);
 
         // Simpan pengajuan cuti
-        PengajuanCuti::create([
+        $pengajuanCuti = PengajuanCuti::create([
             'user_id' => $user->id,
             'jenis_cuti_id' => $validated['jenis_cuti_id'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
@@ -112,6 +110,11 @@ class PengajuanCutiController extends Controller
             'jumlah_hari' => $jumlahHari,
             'alasan' => $validated['alasan'],
             'status' => 'pending_lead',
+        ]);
+
+        $pengajuanCuti->load([
+            'user',
+            'jenisCuti'
         ]);
 
         return redirect()
@@ -148,7 +151,7 @@ class PengajuanCutiController extends Controller
     }
 
     // Edit Pengajuan Cuti
-    public function update(Request $request, PengajuanCuti $pengajuanCuti) 
+    public function update(Request $request, PengajuanCuti $pengajuanCuti)
     {
         if ($pengajuanCuti->status !== 'pending_lead') {
             return redirect()
@@ -186,8 +189,7 @@ class PengajuanCutiController extends Controller
                 ->where('tahun', $tahunCuti)
                 ->first();
 
-            if (!$hakCuti || $hakCuti->sisa < $jumlahHari) 
-            {
+            if (!$hakCuti || $hakCuti->sisa < $jumlahHari) {
                 return redirect()
                     ->back()
                     ->withInput()
@@ -401,7 +403,7 @@ class PengajuanCutiController extends Controller
             );
     }
 
-    
+
 
     // Calculate work days between two dates (exclude Sundays)
 

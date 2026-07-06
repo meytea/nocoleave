@@ -6,14 +6,12 @@
 
     <div>
         <h1 class="text-3xl font-bold text-gray-800">
-            Riwayat Approval Cuti
+            Detail Pengajuan Cuti
         </h1>
 
         <p class="mt-1 text-gray-500">
-            Riwayat persetujuan dan penolakan pengajuan cuti.
+            Menampilkan detail pengajuan cuti serta riwayat proses persetujuan hingga status pengajuan saat ini.
         </p>
-
-       
     </div>
 
     @if(session('success'))
@@ -25,9 +23,81 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
 
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
+        <!-- <h2 class="text-xl font-bold text-gray-800 mb-4">
             Detail Pengajuan Cuti
-        </h2>
+        </h2> -->
+
+        <!-- Stepper -->
+        <div class="mb-6">
+
+            <div class="flex items-start justify-between relative">
+                
+
+                @foreach($workflow as $index => $step)
+
+                <div class="flex-1 flex flex-col items-center relative">
+
+                    <!-- Garis -->
+                    @if(!$loop->last)
+                    <div class="absolute top-5 left-1/2 w-full h-1 z-0">
+
+                        <div class="h-full
+                        @if($rejectedStep !== null)
+                            {{ $index < $rejectedStep ? 'bg-green-500' : 'bg-gray-200' }}
+                        @else
+                            {{ $index < $currentStep ? 'bg-green-500' : 'bg-gray-200' }}
+                        @endif">
+                        </div>
+
+                    </div>
+                    @endif
+
+                    <!-- Bulatnya -->
+                    <div class="relative z-10 w-12 h-12 rounded-full flex items-center justify-center shadow-sm border-2
+                        @if($rejectedStep !== null)
+
+                            @if($index < $rejectedStep)
+                                bg-green-500 border-green-500 text-white
+                            @elseif($index == $rejectedStep)
+                                bg-red-500 border-red-500 text-white
+                            @else
+                                bg-white border-gray-300 text-gray-400
+                            @endif
+                        @else
+
+                        @if($index < $currentStep)
+                                bg-green-500 border-green-500 text-white
+                            @elseif($index == $currentStep)
+                                bg-cyan-500 border-cyan-500 text-white
+                            @else
+                                bg-white border-gray-300 text-gray-400
+                            @endif
+                        @endif">
+
+                        <!-- Icon Stepper -->
+                        @if($rejectedStep !== null && $index == $rejectedStep)
+                            <x-heroicon-s-x-mark class="w-5 h-5" />
+                        @elseif($index < $rejectedStep)
+                            <x-heroicon-s-check class="w-5 h-5" />
+                        @elseif($index < $currentStep)
+                            <x-heroicon-s-check class="w-5 h-5" />
+                        @elseif($index == $currentStep)
+                            <x-heroicon-s-clock class="w-5 h-5" />
+                        @else
+                            <x-heroicon-o-minus class="w-5 h-5" />
+                        @endif  
+                    </div>
+
+                    <span class="mt-3 text-sm font-medium text-gray-700">
+                        {{ $step }}
+                    </span>
+                </div>
+
+                @endforeach
+
+            </div>
+
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 

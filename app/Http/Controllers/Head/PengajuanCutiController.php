@@ -31,7 +31,7 @@ class PengajuanCutiController extends Controller
             $query->where('jenis_cuti_id', $request->jenis_cuti_id);
         }
 
-         $pengajuanCuti = $query->paginate(10)->withQueryString();
+        $pengajuanCuti = $query->paginate(10)->withQueryString();
 
 
         return view('head.pengajuan_cuti.index', compact('pengajuanCuti', 'jenisCutiList'));
@@ -114,6 +114,63 @@ class PengajuanCutiController extends Controller
             ->with('success', 'Pengajuan cuti berhasil dibuat dan menunggu persetujuan');
     }
 
+    // public function show(PengajuanCuti $pengajuanCuti)
+    // {
+    //     $user = Auth::user();
+
+    //     if ($pengajuanCuti->user_id != $user->id) {
+    //         abort(403);
+    //     }
+
+    //     $pengajuanCuti->load([
+    //         'user',
+    //         'jenisCuti'
+    //     ]);
+
+    //     $riwayatApproval = ApprovalCuti::with([
+    //         'approver'
+    //     ])
+    //         ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+    //         ->latest()
+    //         ->get();
+
+    //     return view(
+    //         'head.pengajuan_cuti.detail',
+    //         compact(
+    //             'riwayatApproval',
+    //             'pengajuanCuti'
+    //         )
+    //     );
+    // }
+
+    // // Edit Pengajuan Cuti
+    // public function edit(PengajuanCuti $pengajuanCuti)
+    // {
+    //     if ($pengajuanCuti->status !== 'pending_hrd') {
+
+    //         return redirect()
+    //             ->route('head.pengajuan_cuti.index')
+    //             ->with('error', 'Pengajuan sudah diproses dan tidak dapat diubah.');
+    //     }
+
+    //     $user = Auth::user();
+
+    //     $jenisCuti = JenisCuti::all();
+
+    //     $hakCuti = HakCuti::with('jenisCuti')
+    //         ->where('user_id', $user->id)
+    //         ->get();
+
+    //     return view(
+    //         'head.pengajuan_cuti.edit',
+    //         compact(
+    //             'pengajuanCuti',
+    //             'jenisCuti',
+    //             'hakCuti'
+    //         )
+    //     );
+    // }
+
     public function show(PengajuanCuti $pengajuanCuti)
     {
         $user = Auth::user();
@@ -134,39 +191,65 @@ class PengajuanCutiController extends Controller
             ->latest()
             ->get();
 
+
+
+        $rolePengaju = $pengajuanCuti
+            ->user
+            ->getRoleNames()
+            ->first();
+
+        $workflow = match ($rolePengaju) {
+            'karyawan' => ['Pengajuan', 'Lead', 'HRD', 'Head'],
+            'lead' => ['Pengajuan', 'HRD', 'Head'],
+            'head' => ['Pengajuan', 'HRD', 'Direktur'],
+            'hrd' => ['Pengajuan', 'Direktur'],
+            default => ['Pengajuan'],
+        };
+
+        $currentStep = match ($pengajuanCuti->status) {
+
+            'pending_hrd' => 1,
+            'pending_direktur' => 2,
+
+            'disetujui' => count($workflow),
+
+            'ditolak' => -1,
+
+            default => 1,
+        };
+
+        $rejectedStep = null;
+
+        if (
+            $pengajuanCuti->status === 'ditolak'
+            && $riwayatApproval->isNotEmpty()
+        ) {
+
+            $rejectedRole = $riwayatApproval
+                ->first()
+                ->approver
+                ->getRoleNames()
+                ->first();
+
+            $rejectedStep = match ($rejectedRole) {
+
+                'hrd' => 1,
+
+                'direktur' => 2,
+
+                default => null,
+            };
+        }
+
         return view(
             'head.pengajuan_cuti.detail',
             compact(
                 'riwayatApproval',
-                'pengajuanCuti'
-            )
-        );
-    }
-
-    // Edit Pengajuan Cuti
-    public function edit(PengajuanCuti $pengajuanCuti)
-    {
-        if ($pengajuanCuti->status !== 'pending_hrd') {
-
-            return redirect()
-                ->route('head.pengajuan_cuti.index')
-                ->with('error', 'Pengajuan sudah diproses dan tidak dapat diubah.');
-        }
-
-        $user = Auth::user();
-
-        $jenisCuti = JenisCuti::all();
-
-        $hakCuti = HakCuti::with('jenisCuti')
-            ->where('user_id', $user->id)
-            ->get();
-
-        return view(
-            'head.pengajuan_cuti.edit',
-            compact(
                 'pengajuanCuti',
-                'jenisCuti',
-                'hakCuti'
+                'rolePengaju',
+                'workflow',
+                'currentStep',
+                'rejectedStep'
             )
         );
     }
@@ -213,8 +296,7 @@ class PengajuanCutiController extends Controller
                 ->where('tahun', $tahunCuti)
                 ->first();
 
-            if (!$hakCuti || $hakCuti->sisa < $jumlahHari) 
-            {
+            if (!$hakCuti || $hakCuti->sisa < $jumlahHari) {
 
                 return redirect()
                     ->back()

@@ -143,7 +143,7 @@ class PengajuanCutiController extends Controller
     }
 
     // Edit Pengajuan Cuti
-    public function update(Request $request, PengajuanCuti $pengajuanCuti) 
+    public function update(Request $request, PengajuanCuti $pengajuanCuti)
     {
         if ($pengajuanCuti->status !== 'pending_hrd') {
 
@@ -182,8 +182,7 @@ class PengajuanCutiController extends Controller
                 ->where('tahun', $tahunCuti)
                 ->first();
 
-            if (!$hakCuti || $hakCuti->sisa < $jumlahHari) 
-            { 
+            if (!$hakCuti || $hakCuti->sisa < $jumlahHari) {
                 return redirect()
                     ->back()
                     ->withInput()
@@ -216,6 +215,35 @@ class PengajuanCutiController extends Controller
             );
     }
 
+    // public function show(PengajuanCuti $pengajuanCuti)
+    // {
+    //     $user = Auth::user();
+
+    //     if ($pengajuanCuti->user_id != $user->id) {
+    //         abort(403);
+    //     }
+
+    //     $pengajuanCuti->load([
+    //         'user',
+    //         'jenisCuti'
+    //     ]);
+
+    //     $riwayatApproval = ApprovalCuti::with([
+    //         'approver'
+    //     ])
+    //         ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+    //         ->latest()
+    //         ->get();
+
+    //     return view(
+    //         'lead.pengajuan_cuti.detail',
+    //         compact(
+    //             'riwayatApproval',
+    //             'pengajuanCuti'
+    //         )
+    //     );
+    // }
+
     public function show(PengajuanCuti $pengajuanCuti)
     {
         $user = Auth::user();
@@ -236,16 +264,70 @@ class PengajuanCutiController extends Controller
             ->latest()
             ->get();
 
+
+
+        $rolePengaju = $pengajuanCuti
+            ->user
+            ->getRoleNames()
+            ->first();
+
+        $workflow = match ($rolePengaju) {
+            'karyawan' => ['Pengajuan', 'Lead', 'HRD', 'Head'],
+            'lead' => ['Pengajuan', 'HRD', 'Head'],
+            'head' => ['Pengajuan', 'HRD', 'Direktur'],
+            'hrd' => ['Pengajuan', 'Direktur'],
+            default => ['Pengajuan'],
+        };
+
+        $currentStep = match ($pengajuanCuti->status) {
+
+            'pending_hrd' => 1,
+            'pending_head' => 2,
+
+            'disetujui' => count($workflow),
+
+            'ditolak' => -1,
+
+            default => 1,
+        };
+
+        $rejectedStep = null;
+
+        if (
+            $pengajuanCuti->status === 'ditolak'
+            && $riwayatApproval->isNotEmpty()
+        ) {
+
+            $rejectedRole = $riwayatApproval
+                ->first()
+                ->approver
+                ->getRoleNames()
+                ->first();
+
+            $rejectedStep = match ($rejectedRole) {
+
+                'hrd' => 1,
+
+                'head' => 2,
+
+                default => null,
+            };
+        }
+
         return view(
             'lead.pengajuan_cuti.detail',
             compact(
                 'riwayatApproval',
-                'pengajuanCuti'
+                'pengajuanCuti',
+                'rolePengaju',
+                'workflow',
+                'currentStep',
+                'rejectedStep'
             )
         );
     }
 
-   public function pengajuanDisetujui(Request $request)
+    public function pengajuanDisetujui(Request $request)
     {
         $user = Auth::user();
 

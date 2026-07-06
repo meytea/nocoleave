@@ -18,10 +18,17 @@ class DatabaseSeeder extends Seeder
         // Pastikan role sudah tersedia sebelum assign role ke admin HRD.
         $this->call([
             RoleSeeder::class,
-            AdminSeeder::class,
             DivisiSeeder::class,
+            UserSeeder::class,
+            // AdminSeeder::class,
+            // DirekturSeeder::class,
+           
             JenisCutiSeeder::class,
+            HeadSeeder::class,
+            // LeadSeeder::class,
+            // KaryawanSeeder::class,
             HakCutiSeeder::class,
+            
         ]);
 
         // User::factory(10)->create();

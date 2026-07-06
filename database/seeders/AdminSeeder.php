@@ -20,11 +20,11 @@ class AdminSeeder extends Seeder
         $divisi = Divisi::first();
 
         $user = User::firstOrCreate(
-            ['email' => 'admin@nocoleave.com'],
+            ['email' => 'karier@gmail.com'],
             [
-                'name' => 'Admin HRD',
+                'name' => 'Karier Susastra',
                 'password' => Hash::make('password'),
-                'nik' => '2001',
+                'nik' => '102405001',
                 'jenis_kelamin' => 'laki-laki',
                 'is_active' => true,
                 'divisi_id' => $divisi?->id,
