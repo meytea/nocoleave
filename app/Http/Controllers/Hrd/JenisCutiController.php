@@ -11,11 +11,25 @@ class JenisCutiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $jenis_cuti = JenisCuti::latest()->paginate(10);
+        $jenis_cuti = JenisCuti::when($request->search, function ($query) use ($request) {
 
-        return view('hrd.jenis_cuti.index', compact('jenis_cuti'));
+            $query->where(
+                'nama_cuti',
+                'like',
+                "%{$request->search}%"
+            );
+        })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'hrd.jenis_cuti.index',
+            compact('jenis_cuti')
+        );
     }
 
     /**
@@ -69,22 +83,22 @@ class JenisCutiController extends Controller
 
     public function update(Request $request, JenisCuti $jenis_cuti)
     {
-    $validated = $request->validate([
-        'nama_cuti' => 'required|string|max:255|unique:jenis_cuti,nama_cuti,' . $jenis_cuti->id,
-        'kuota' => 'required|integer|min:1',
-        'is_tahunan' => 'nullable|boolean',
-    ]);
+        $validated = $request->validate([
+            'nama_cuti' => 'required|string|max:255|unique:jenis_cuti,nama_cuti,' . $jenis_cuti->id,
+            'kuota' => 'required|integer|min:1',
+            'is_tahunan' => 'nullable|boolean',
+        ]);
 
-    $jenis_cuti->update([
-        'nama_cuti' => $validated['nama_cuti'],
-        'kuota' => $validated['kuota'],
-        'is_tahunan' => $request->has('is_tahunan'),
-    ]);
+        $jenis_cuti->update([
+            'nama_cuti' => $validated['nama_cuti'],
+            'kuota' => $validated['kuota'],
+            'is_tahunan' => $request->has('is_tahunan'),
+        ]);
 
-    return redirect()
-        ->route('jenis_cuti.index')
-        ->with('success', 'Jenis cuti berhasil diperbarui');
-}
+        return redirect()
+            ->route('jenis_cuti.index')
+            ->with('success', 'Jenis cuti berhasil diperbarui');
+    }
 
     /**
      * Remove the specified resource from storage.

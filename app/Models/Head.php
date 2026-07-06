@@ -10,6 +10,7 @@ class Head extends Model
     protected $table = 'heads';
 
     protected $fillable = [
+        'nama_departemen',
         'user_id',
         'divisi_id',
     ];
@@ -23,4 +24,6 @@ class Head extends Model
     {
         return $this->belongsTo(Divisi::class);
     }
+
+    
 }

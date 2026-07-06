@@ -15,43 +15,154 @@ class ApprovalCutiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $pengajuan_cuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
             ->where('status', 'pending_direktur')
-            ->latest()
-            ->paginate(10);
 
-        return view('direktur.approval_cuti.index', compact('pengajuan_cuti'));
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'direktur.approval_cuti.index',
+            compact('pengajuan_cuti')
+        );
     }
 
-    public function pengajuanDitolak()
+    public function pengajuanDitolak(Request $request)
     {
         $pengajuan_cuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
             ->where('status', 'ditolak')
-            ->latest()
-            ->paginate(10);
 
-        return view('direktur.approval_cuti.ditolak', compact('pengajuan_cuti'));
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'direktur.approval_cuti.ditolak',
+            compact('pengajuan_cuti')
+        );
     }
 
-    public function pengajuanDisetujui()
+    public function pengajuanDisetujui(Request $request)
     {
         $pengajuan_cuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
             ->where('status', 'disetujui')
-            ->latest()
-            ->paginate(10);
+            ->when($request->get('status') === 'sedang_cuti', function ($query) {
 
-        return view('direktur.approval_cuti.disetujui', compact('pengajuan_cuti'));
+                $query->where('status', 'disetujui')
+                    ->whereDate('tanggal_mulai', '<=', today())
+                    ->whereDate('tanggal_selesai', '>=', today());
+            })
+
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'direktur.approval_cuti.disetujui',
+            compact('pengajuan_cuti')
+        );
     }
 
     public function setuju(PengajuanCuti $pengajuanCuti)
@@ -130,5 +241,28 @@ class ApprovalCutiController extends Controller
 
         return redirect()->back()
             ->with('success', 'Pengajuan berhasil ditolak.');
+    }
+
+    public function show($id)
+    {
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])->findOrFail($id);
+
+        $riwayatApproval = ApprovalCuti::with([
+            'approver.roles'
+        ])
+            ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+            ->latest()
+            ->get();
+
+        return view(
+            'direktur.approval_cuti.detail',
+            compact(
+                'pengajuanCuti',
+                'riwayatApproval'
+            )
+        );
     }
 }

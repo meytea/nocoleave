@@ -44,36 +44,122 @@
     </div>
     @endif
 
+    @if(request('status') === 'sedang_cuti')
+
+    <div class="mb-4 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3">
+
+        <div class="flex items-center justify-between">
+
+            <span class="text-cyan-700 font-medium">
+                Menampilkan karyawan yang sedang cuti hari ini.
+            </span>
+
+            <a href="{{ route('hrd.approval_cuti.disetujui') }}"
+                class="text-cyan-600 hover:underline text-sm">
+
+                Lihat Semua
+
+            </a>
+
+        </div>
+
+    </div>
+    @endif
+
     {{-- TABLE CARD --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
         {{-- Card Header --}}
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+
+            {{-- Judul --}}
             <div>
-                <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
-                <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuanCuti->total() }} pengajuan</p>
+                <h2 class="text-xl font-bold text-gray-900">
+                    Daftar Pengajuan Cuti
+                </h2>
+
+                <p class="text-sm text-gray-600 mt-1">
+                    Total: {{ $pengajuanCuti->total() }} pengajuan
+                </p>
             </div>
 
-            <div class="flex items-center gap-3">
+            {{-- Search & Filter --}}
+            <form
+                method="GET"
+                id="filterForm"
+                class="flex items-center gap-4">
+
+                {{-- Filter Jabatan --}}
+                @php
+                $jabatanList = [
+                'karyawan' => 'Karyawan',
+                'lead' => 'Lead',
+                'head' => 'Head',
+                'hrd' => 'HRD',
+                ];
+                @endphp
+
+                <select
+                    name="jabatan"
+                    onchange="this.form.submit()"
+                    class="w-44 rounded-xl border-gray-300 text-sm">
+
+                    <option value="">Semua Jabatan</option>
+
+                    @foreach($jabatanList as $value => $label)
+                    <option
+                        value="{{ $value }}"
+                        {{ request('jabatan') == $value ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                    @endforeach
+
+                </select>
+
+                <!-- {{-- Filter Divisi --}}
+                <select
+                    name="divisi"
+                    onchange="this.form.submit()"
+                    class="w-64 rounded-xl border-gray-300 text-sm focus:border-cyan-500 focus:ring-cyan-500">
+
+                    <option value="">Semua Divisi</option>
+
+                    @foreach($divisi as $item)
+
+                    <option
+                        value="{{ $item->id }}"
+                        {{ request('divisi') == $item->id ? 'selected' : '' }}>
+
+                        {{ $item->nama_divisi }}
+
+                    </option>
+
+                    @endforeach
+
+                </select> -->
 
                 {{-- Search --}}
-                <form method="GET">
-                    <div class="relative">
-                        <input
-                            type="text"
-                            name="search"
-                            value="{{ request('search') }}"
-                            placeholder="Cari nama, jabatan, divisi..."
-                            class="pl-10 pr-4 py-3 rounded-2xl border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+                <div class="relative w-72">
+
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <x-heroicon-o-magnifying-glass
-                            class="w-5 h-5 absolute left-3 top-3.5 text-gray-400" />
+                            class="w-5 h-5 text-gray-400" />
                     </div>
-                </form>
+
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari..."
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                </div>
 
                 {{-- Export --}}
 
+                @if(request('status') !== 'sedang_cuti')
 
-                {{-- Export --}}
                 <a
                     href="{{ route('hrd.riwayat_cuti.laporan') }}"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white">
@@ -84,8 +170,12 @@
 
                 </a>
 
+                @endif
 
-            </div>
+            </form>
+
+
+
         </div>
 
         {{-- Table --}}
@@ -126,10 +216,10 @@
                                 {{ $item->jenisCuti->nama_cuti }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
+                        <td class="px-6 py-4 text-center text-sm text-gray-600">
                             {{ $item->tanggal_mulai->format('d M Y') }}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
+                        <td class="px-6 py-4 text-center text-sm text-gray-600">
                             {{ $item->tanggal_selesai->format('d M Y') }}
                         </td>
 

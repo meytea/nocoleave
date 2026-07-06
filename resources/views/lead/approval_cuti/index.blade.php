@@ -3,10 +3,11 @@
 @section('content')
 
 <div class="space-y-8">
+
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Pengajuan Cuti</h1>
-        <p class="text-gray-600 mt-2">Kelola pengajuan cuti Anda</p>
+        <h1 class="text-4xl font-bold text-gray-900"> Approval Cuti</h1>
+        <p class="text-gray-600 mt-2">Menampilkan daftar pengajuan cuti yang menunggu persetujuan.</p>
     </div>
 
     {{-- Success Message --}}
@@ -31,7 +32,28 @@
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
                 <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuan_cuti->total() }} pengajuan</p>
             </div>
-           
+
+            <form method="GET" id="searchForm">
+
+                <div class="relative w-full max-w-md">
+
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <x-heroicon-o-magnifying-glass
+                            class="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari..."
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                </div>
+
+            </form>
+
         </div>
 
         {{-- Table --}}
@@ -56,7 +78,6 @@
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                             {{ $pengajuan_cuti->firstItem() + $index }}
                         </td>
-                        <td>{{ $item->id }}</td>
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                             {{ $item->user->name }}
                         </td>
@@ -130,7 +151,7 @@
 
                                 </form> -->
 
-                                <a href="#"
+                                <a href="{{ route('lead.approval_cuti.show', $item->id) }}"
                                     class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Detail
                                 </a>
@@ -150,9 +171,9 @@
                                 </svg>
                                 <div>
                                     <p class="text-gray-600 font-medium">Belum ada pengajuan cuti</p>
-                                  
+
                                 </div>
-                                
+
                         </td>
                     </tr>
                     @endforelse
@@ -216,9 +237,9 @@
                 </svg>
                 <div>
                     <p class="text-gray-900 font-bold text-lg">Belum ada pengajuan cuti</p>
-                    
+
                 </div>
-                
+
             </div>
         </div>
         @endif
@@ -287,5 +308,17 @@
             .getElementById('rejectModal')
             .classList.add('hidden');
     }
+
+    let timer;
+
+    document.getElementById('search').addEventListener('keyup', function() {
+
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            document.getElementById('searchForm').submit();
+        }, 500);
+
+    });
 </script>
 @endsection

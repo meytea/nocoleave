@@ -35,13 +35,58 @@ class DashboardController extends Controller
             ->count();
 
 
-        $pengajuanTerbaru = PengajuanCuti::with('jenisCuti')
-            ->where('user_id', $user->id)
-            ->latest()
-            ->take(5)
-            ->get();
+        // $pengajuanTerbaru = PengajuanCuti::with('jenisCuti')
+        //     ->where('user_id', $user->id)
+        //     ->latest()
+        //     ->take(5)
+        //     ->get();
 
-        $pengajuanCuti = PengajuanCuti::where('user_id', $user->id)
+        $pengajuanCuti = PengajuanCuti::with('jenisCuti')
+            ->where('user_id', $user->id)
+
+            ->when($request->search, function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    // Cari berdasarkan jenis cuti
+                    $q->whereHas('jenisCuti', function ($jenis) use ($search) {
+
+                        $jenis->where(
+                            'nama_cuti',
+                            'like',
+                            "%{$search}%"
+                        );
+                    })
+
+                        // Cari berdasarkan status
+                        ->orWhere(
+                            'status',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        // Cari berdasarkan tanggal
+                        ->orWhere(
+                            'tanggal_mulai',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'tanggal_selesai',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'tanggal_masuk',
+                            'like',
+                            "%{$search}%"
+                        );
+                });
+            })
+
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 
@@ -51,7 +96,7 @@ class DashboardController extends Controller
                 'sisaCutiTahunan',
                 'pengajuanDisetujui',
                 'pengajuanDitolak',
-                'pengajuanTerbaru',
+                // 'pengajuanTerbaru',
                 'pengajuanCuti'
             )
         );

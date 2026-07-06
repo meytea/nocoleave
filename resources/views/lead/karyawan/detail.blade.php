@@ -149,10 +149,10 @@
 </div>
 
 <div class="flex justify-end">
-    <a href="{{ route('lead.karyawan.index') }}"
-        class="inline-block mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
-        Kembali
-    </a>
+    <a href="{{ url()->previous() }}"
+            class="inline-block mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
+            Kembali
+        </a>
 </div>
 
 </div>

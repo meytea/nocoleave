@@ -30,13 +30,27 @@
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
                 <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuan_cuti->total() }} pengajuan</p>
             </div>
-            <a href="#"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Ajukan Cuti
-            </a>
+
+            <form method="GET" id="searchForm">
+
+                <div class="relative w-full max-w-md">
+
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <x-heroicon-o-magnifying-glass
+                            class="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari..."
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                </div>
+
+            </form>
         </div>
 
         {{-- Table --}}
@@ -99,7 +113,7 @@
 
                             <div class="flex items-center justify-center gap-3">
                                 </form>
-                                <a href="#"
+                                <a href="{{ route('head.approval_cuti.show', $item->id) }}"
                                     class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Detail
                                 </a>
@@ -119,16 +133,9 @@
                                 </svg>
                                 <div>
                                     <p class="text-gray-600 font-medium">Belum ada pengajuan cuti</p>
-                                    <p class="text-sm text-gray-500 mt-1">Mulai buat pengajuan cuti pertama Anda</p>
+
                                 </div>
-                                <a href="#"
-                                    class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-700 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Ajukan Cuti
-                                </a>
-                            </div>
+
                         </td>
                     </tr>
                     @endforelse
@@ -192,21 +199,28 @@
                 </svg>
                 <div>
                     <p class="text-gray-900 font-bold text-lg">Belum ada pengajuan cuti</p>
-                    <p class="text-sm text-gray-600 mt-2">Anda belum membuat pengajuan cuti apapun. Mulai buat pengajuan pertama Anda sekarang.</p>
+
+
                 </div>
-                <a href="#"
-                    class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajukan Cuti
-                </a>
             </div>
+            @endif
+
         </div>
-        @endif
 
     </div>
 
-</div>
+    <script>
+        let timer;
 
-@endsection
+        document.getElementById('search').addEventListener('keyup', function() {
+
+            clearTimeout(timer);
+
+            timer = setTimeout(() => {
+                document.getElementById('searchForm').submit();
+            }, 500);
+
+        });
+    </script>
+
+    @endsection

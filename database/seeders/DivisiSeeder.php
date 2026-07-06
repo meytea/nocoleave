@@ -16,12 +16,15 @@ class DivisiSeeder extends Seeder
         $divisi = [
             'Support Operasional',
             'HSE',
+
             'Web Developer Frontend',
             'Web Developer Backend',
             'Mobile Developer',
-            'Project Manager Offcer',
-            'IOT Developer',
+            'Project Management Officer',
+            'IoT Development',
+
             'Human Resource Development',
+
             'Regional Business Development',
             'Digital Marketing',
         ];

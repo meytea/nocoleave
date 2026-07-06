@@ -19,6 +19,8 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
+            $table->string('nama_departemen');
+
             $table->foreignId('divisi_id')
                 ->constrained('divisi')
                 ->cascadeOnDelete();

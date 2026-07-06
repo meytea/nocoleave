@@ -22,34 +22,51 @@ $user = auth()->user();
                 {{-- User Info --}}
                 @if($user)
                 <div class="mt-2 pt-2 border-t border-gray-100 w-full">
-                    <p class="text-xs font-semibold text-slate-700 truncate">{{ $user->name }}</p>
-                    @if($user->divisi)
-                    <p class="text-xs text-slate-500 truncate">{{ $user->divisi->nama_divisi }}</p>
-                    @endif
+
+                    <p class="text-xs font-semibold text-slate-700 truncate">
+                        {{ $user->name }}
+                    </p>
+
+                    @if($user->hasRole('head'))
+
+    <p class="text-xs text-slate-500 truncate">
+        {{ $user->head?->nama_departemen }}
+    </p>
+
+@elseif($user->divisi)
+
+    <p class="text-xs text-slate-500 truncate">
+        {{ $user->divisi->nama_divisi }}
+    </p>
+
+@endif
+
                 </div>
                 @endif
+
+
             </div>
         </div>
 
         {{-- ROLE-BASED MENU INCLUDE --}}
         @role('karyawan')
-            @include('layouts.sidebar.karyawan')
+        @include('layouts.sidebar.karyawan')
         @endrole
 
         @role('lead')
-            @include('layouts.sidebar.lead')
+        @include('layouts.sidebar.lead')
         @endrole
 
         @role('head')
-            @include('layouts.sidebar.head')
+        @include('layouts.sidebar.head')
         @endrole
 
         @role('hrd')
-            @include('layouts.sidebar.hrd')
+        @include('layouts.sidebar.hrd')
         @endrole
 
         @role('direktur')
-            @include('layouts.sidebar.direktur')
+        @include('layouts.sidebar.direktur')
         @endrole
 
     </nav>

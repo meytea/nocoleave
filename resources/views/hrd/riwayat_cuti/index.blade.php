@@ -5,7 +5,7 @@
 <div class="space-y-8">
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Pengajuan Cuti</h1>
+        <h1 class="text-4xl font-bold text-gray-900">Monitoring Pengajuan Cuti</h1>
         <p class="text-gray-600 mt-2">Kelola pengajuan cuti Anda</p>
     </div>
 
@@ -49,14 +49,77 @@
 
         {{-- Card Header --}}
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+
+            {{-- Judul --}}
             <div>
-                <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
-                <p class="text-sm text-gray-600 mt-1">Total: {{ $pengajuanCuti->total() }} pengajuan</p>
+                <h2 class="text-xl font-bold text-gray-900">
+                    Daftar Pengajuan Cuti
+                </h2>
+
+                <p class="text-sm text-gray-600 mt-1">
+                    Total: {{ $pengajuanCuti->total() }} pengajuan
+                </p>
             </div>
 
-            <form method="GET" id="searchForm">
+            {{-- Search & Filter --}}
+            <form
+                method="GET"
+                id="filterForm"
+                class="flex items-center gap-4">
 
-                <div class="relative w-full max-w-md">
+                {{-- Filter Status --}}
+                @php
+                $statusList = [
+                'pending_lead' => 'Pending Lead',
+                'pending_hrd' => 'Pending HRD',
+                'pending_head' => 'Pending Head',
+                'pending_direktur' => 'Pending Direktur',
+                'disetujui' => 'Disetujui',
+                'ditolak' => 'Ditolak',
+                ];
+                @endphp
+
+                <select
+                    name="status"
+                    onchange="this.form.submit()"
+                    class="w-52 rounded-xl border-gray-300 text-sm">
+
+                    <option value="">Semua Status</option>
+
+                    @foreach($statusList as $value => $label)
+                    <option
+                        value="{{ $value }}"
+                        {{ request('status') == $value ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                    @endforeach
+
+                </select>
+
+                {{-- Filter Divisi --}}
+                <select
+                    name="divisi"
+                    onchange="this.form.submit()"
+                    class="w-64 rounded-xl border-gray-300 text-sm focus:border-cyan-500 focus:ring-cyan-500">
+
+                    <option value="">Semua Divisi</option>
+
+                    @foreach($divisi as $item)
+
+                    <option
+                        value="{{ $item->id }}"
+                        {{ request('divisi') == $item->id ? 'selected' : '' }}>
+
+                        {{ $item->nama_divisi }}
+
+                    </option>
+
+                    @endforeach
+
+                </select>
+
+                {{-- Search --}}
+                <div class="relative w-72">
 
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <x-heroicon-o-magnifying-glass
@@ -68,12 +131,15 @@
                         name="search"
                         id="search"
                         value="{{ request('search') }}"
-                        placeholder="Cari nama, jabatan, divisi, jenis cuti..."
+                        placeholder="Cari..."
                         class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
 
                 </div>
 
+
+
             </form>
+
         </div>
 
         {{-- Table --}}
@@ -99,7 +165,7 @@
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                             {{ $pengajuanCuti->firstItem() + $index }}
                         </td>
-                        
+
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                             {{ $item->user->name }}
                         </td>

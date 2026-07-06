@@ -8,48 +8,118 @@ use App\Http\Controllers\Controller;
 use App\Models\PengajuanCuti;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Head;
 
 class ApprovalCutiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+
         $pengajuan_cuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
             ->where('status', 'pending_lead')
+
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('divisi_id', $user->divisi_id);
             })
-            ->latest()
-            ->paginate(10);
 
-        return view('lead.approval_cuti.index', compact('pengajuan_cuti'));
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+                            $jenis->where('nama_cuti', 'like', "%{$search}%");
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view(
+            'lead.approval_cuti.index',
+            compact('pengajuan_cuti')
+        );
     }
 
-    public function pengajuanDitolak()
+    public function pengajuanDitolak(Request $request)
     {
         $user = Auth::user();
+
         $pengajuan_cuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
             ->where('status', 'ditolak')
+
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('divisi_id', $user->divisi_id);
             })
+
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('lead.approval_cuti.ditolak', compact('pengajuan_cuti'));
-
-        //return "Halaman pengajuan cuti yang ditolak oleh lead. Fitur ini masih dalam pengembangan.";
+        return view(
+            'lead.approval_cuti.ditolak',
+            compact('pengajuan_cuti')
+        );
     }
-    public function pengajuanDisetujui()
+
+
+    public function pengajuanDisetujui(Request $request)
     {
         $user = Auth::user();
 
@@ -62,15 +132,55 @@ class ApprovalCutiController extends Controller
                 'pending_head',
                 'disetujui'
             ])
+
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('divisi_id', $user->divisi_id);
             })
+            ->when($request->get('status') === 'sedang_cuti', function ($query) {
+
+                $query->where('status', 'disetujui')
+                    ->whereDate('tanggal_mulai', '<=', today())
+                    ->whereDate('tanggal_selesai', '>=', today());
+            })
+
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('lead.approval_cuti.disetujui', compact('pengajuan_cuti'));
-
-        //return "Halaman pengajuan cuti yang ditolak oleh lead. Fitur ini masih dalam pengembangan.";
+        return view(
+            'lead.approval_cuti.disetujui',
+            compact('pengajuan_cuti')
+        );
     }
 
     public function setuju(PengajuanCuti $pengajuanCuti)
@@ -153,9 +263,27 @@ class ApprovalCutiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ApprovalCuti $approvalCuti)
+    public function show($id)
     {
-        //
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])->findOrFail($id);
+
+        $riwayatApproval = ApprovalCuti::with([
+            'approver.roles'
+        ])
+            ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+            ->latest()
+            ->get();
+
+        return view(
+            'lead.approval_cuti.detail',
+            compact(
+                'pengajuanCuti',
+                'riwayatApproval'
+            )
+        );
     }
 
     /**

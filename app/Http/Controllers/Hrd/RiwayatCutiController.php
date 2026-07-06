@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ApprovalCuti;
 use App\Models\JenisCuti;
+use App\Models\Divisi;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanCutiTahunanExport;
 use App\Exports\LaporanCutiNonTahunanExport;
@@ -20,11 +21,13 @@ class RiwayatCutiController extends Controller
      */
     public function index(Request $request)
     {
+        $divisi = Divisi::orderBy('nama_divisi')->get();
+
         $pengajuanCuti = PengajuanCuti::with([
             'user',
             'jenisCuti'
         ])
-
+            //search
             ->when($request->search, function ($query) use ($request) {
 
                 $search = $request->search;
@@ -55,13 +58,28 @@ class RiwayatCutiController extends Controller
                 });
             })
 
+            // Filter Status
+            ->when($request->status, function ($query) use ($request) {
+
+                $query->where('status', $request->status);
+            })
+
+            // Filter Divisi
+            ->when($request->divisi, function ($query) use ($request) {
+
+                $query->whereHas('user.divisi', function ($divisi) use ($request) {
+
+                    $divisi->where('id', $request->divisi);
+                });
+            })
+
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
         return view(
             'hrd.riwayat_cuti.index',
-            compact('pengajuanCuti')
+            compact('pengajuanCuti', 'divisi')
         );
     }
 
@@ -88,31 +106,10 @@ class RiwayatCutiController extends Controller
         );
     }
 
-    public function destroy($id)
-    {
-        $pengajuanCuti = PengajuanCuti::findOrFail($id);
-
-        if (in_array($pengajuanCuti->status, [
-            'disetujui',
-            'ditolak'
-        ])) {
-
-            return back()->with(
-                'error',
-                'Pengajuan cuti yang telah memperoleh keputusan akhir tidak dapat dihapus.'
-            );
-        }
-
-        $pengajuanCuti->delete();
-
-        return back()->with(
-            'success',
-            'Pengajuan cuti berhasil dihapus.'
-        );
-    }
-
     public function disetujui(Request $request)
     {
+        $divisi = Divisi::orderBy('nama_divisi')->get();
+
         $pengajuanCuti = PengajuanCuti::with([
             'user.roles',
             'user.divisi',
@@ -148,6 +145,26 @@ class RiwayatCutiController extends Controller
                         });
                 });
             })
+            // Filter Status
+            ->when($request->status, function ($query) use ($request) {
+
+                $query->where('status', $request->status);
+            })
+
+            // Filter Jabatan
+            ->when($request->jabatan, function ($query) use ($request) {
+
+                $query->whereHas('user.roles', function ($role) use ($request) {
+
+                    $role->where('name', $request->jabatan);
+                });
+            })
+            ->when($request->get('status') === 'sedang_cuti', function ($query) {
+
+                $query->where('status', 'disetujui')
+                    ->whereDate('tanggal_mulai', '<=', today())
+                    ->whereDate('tanggal_selesai', '>=', today());
+            })
 
             ->latest()
             ->paginate(10)
@@ -155,9 +172,33 @@ class RiwayatCutiController extends Controller
 
         return view(
             'hrd.riwayat_cuti.disetujui',
-            compact('pengajuanCuti')
+            compact('pengajuanCuti', 'divisi')
         );
     }
+
+    public function destroy($id)
+    {
+        $pengajuanCuti = PengajuanCuti::findOrFail($id);
+
+        if (in_array($pengajuanCuti->status, [
+            'disetujui',
+            'ditolak'
+        ])) {
+
+            return back()->with(
+                'error',
+                'Pengajuan cuti yang telah memperoleh keputusan akhir tidak dapat dihapus.'
+            );
+        }
+
+        $pengajuanCuti->delete();
+
+        return back()->with(
+            'success',
+            'Pengajuan cuti berhasil dihapus.'
+        );
+    }
+
 
     public function laporan()
     {
@@ -170,24 +211,23 @@ class RiwayatCutiController extends Controller
     }
 
     public function export(Request $request)
-{
-     if ($request->jenis_laporan == 'tahunan') {
+    {
+        if ($request->jenis_laporan == 'tahunan') {
+
+            return Excel::download(
+                new LaporanCutiTahunanExport($request->tahun),
+                'Laporan_Cuti_Tahunan_' . $request->tahun . '.xlsx'
+            );
+        }
 
         return Excel::download(
-            new LaporanCutiTahunanExport($request->tahun),
-            'Laporan_Cuti_Tahunan_' . $request->tahun . '.xlsx'
+            new LaporanCutiNonTahunanExport(
+                $request->tahun,
+                $request->jenis_cuti_id
+            ),
+            'Laporan_Cuti_Non_Tahunan_' . $request->tahun . '.xlsx'
         );
-
     }
-
-    return Excel::download(
-        new LaporanCutiNonTahunanExport(
-            $request->tahun,
-            $request->jenis_cuti_id
-        ),
-        'Laporan_Cuti_Non_Tahunan_' . $request->tahun . '.xlsx'
-    );
-}
 
     /**
      * Show the form for creating a new resource.

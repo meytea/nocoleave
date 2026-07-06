@@ -6,90 +6,125 @@
 
     {{-- HEADER SECTION --}}
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900">Dashboard Lead </h1>
-        <p class="text-gray-600 mt-2">Selamat Datang</p>
+        <h1 class="text-4xl font-bold text-gray-900">
+            Selamat Datang, {{ Auth::user()->name }}
+        </h1>
+
+        <p class="text-gray-600 mt-2">
+            Selamat datang di Dashboard Lead.
+        </p>
     </div>
 
     {{-- STATISTICS CARDS --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {{-- Sisa Cuti Card --}}
+        {{-- Karyawan Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Total Karyawan Aktif</p>
-                    <p class="text-4xl font-bold text-gray-900 mt-2">
-                        {{ $totalKaryawan }}
-                    </p>
-                    <p class="text-gray-500 text-xs mt-2">
-                        Karyawan
-                    </p>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-cyan-50 rounded-2xl flex items-center justify-center">
+            <a href="{{ route('lead.karyawan.index') }}"
+                class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Karyawan Aktif</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-2">
+                            {{ $totalKaryawan }}
+                        </p>
+                        <p class="text-gray-500 text-xs mt-2">
+                            Karyawan
+                        </p>
+                    </div>
                     <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-cyan-50 rounded-2xl flex items-center justify-center">
-                        <x-heroicon-o-users class="w-8 h-8 text-cyan-600" />
+                        <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-cyan-50 rounded-2xl flex items-center justify-center">
+                            <x-heroicon-o-users class="w-8 h-8 text-cyan-600" />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
 
 
         {{--Sedang Cuti Hari Ini Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">
-                        Sedang Cuti Hari Ini
-                    </p>
+            <a href="{{ route('lead.approval_cuti.disetujui', ['status' => 'sedang_cuti']) }}"
+                class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">
+                            Sedang Cuti Hari Ini
+                        </p>
 
-                    <p class="text-4xl font-bold text-gray-900 mt-2">
-                        {{ $sedangCutiHariIni }}
-                    </p>
+                        <p class="text-4xl font-bold text-gray-900 mt-2">
+                            {{ $sedangCutiHariIni }}
+                        </p>
 
-                    <p class="text-gray-500 text-xs mt-2">
-                        Karyawan sedang cuti
-                    </p>
+                        <p class="text-gray-500 text-xs mt-2">
+                            Karyawan sedang cuti
+                        </p>
+                    </div>
+
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-50 rounded-2xl flex items-center justify-center">
+                        <x-heroicon-o-calendar-days class="w-8 h-8 text-green-600" />
+                    </div>
                 </div>
-
-                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-50 rounded-2xl flex items-center justify-center">
-                    <x-heroicon-o-calendar-days class="w-8 h-8 text-green-600" />
-                </div>
-            </div>
+            </a>
         </div>
 
         {{-- Pending Approval --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">
-                        Menunggu Persetujuan Lead
-                    </p>
+            <a href="{{ route('lead.approval_cuti.index') }}"
+                class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">
+                            Menunggu Persetujuan Lead
+                        </p>
 
-                    <p class="text-4xl font-bold text-gray-900 mt-2">
-                        {{ $pendingLead }}
-                    </p>
+                        <p class="text-4xl font-bold text-gray-900 mt-2">
+                            {{ $pendingLead }}
+                        </p>
 
-                    <p class="text-gray-500 text-xs mt-2">
-                        Pengajuan pending Lead
-                    </p>
+                        <p class="text-gray-500 text-xs mt-2">
+                            Pengajuan pending Lead
+                        </p>
+                    </div>
+
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-2xl flex items-center justify-center">
+                        <x-heroicon-o-clock class="w-8 h-8 text-yellow-600" />
+                    </div>
                 </div>
-
-                <div class="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-2xl flex items-center justify-center">
-                    <x-heroicon-o-clock class="w-8 h-8 text-yellow-600" />
-                </div>
-            </div>
+            </a>
         </div>
     </div>
-    {{-- TABLE CARD --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-        {{-- Card Header --}}
+    {{-- TABLE CARD --}}
+    <div  class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">Daftar Pengajuan Cuti</h2>
-                
             </div>
+
+            <form method="GET" id="searchForm">
+
+                <div class="relative w-full max-w-md">
+
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <x-heroicon-o-magnifying-glass
+                            class="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari..."
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                </div>
+
+            </form>
+
         </div>
 
         {{-- Table --}}
@@ -131,10 +166,10 @@
                             Jumlah Hari
                         </th>
 
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        <!-- <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Status
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        </th> -->
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Aksi
                         </th>
 
@@ -172,7 +207,7 @@
                         <td class="px-6 py-4 text-sm text-gray-900 font-semibold text-center">
                             {{ $item->jumlah_hari }} hari
                         </td>
-                        <td class="px-6 py-4 text-sm">
+                        <!-- <td class="px-6 py-4 text-sm text-center">
                             @php
                             $statusConfig = [
                             'pending_lead' => ['bg' => 'bg-yellow-50', 'text' => 'text-yellow-700', 'label' => 'Pending Lead'],
@@ -187,7 +222,7 @@
                             <span class="px-3 py-1 rounded-full {{ $config['bg'] }} {{ $config['text'] }} text-xs font-semibold">
                                 {{ $config['label'] }}
                             </span>
-                        </td>
+                        </td> -->
                         <td class="px-6 py-4">
 
                             <div class="flex items-center justify-center gap-3">
@@ -209,7 +244,7 @@
                                     Tolak
 
                                 </button>
-                                <a href="#"
+                                <a href="{{ route('lead.approval_cuti.show', $item->id) }}"
                                     class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-semibold">
                                     Detail
                                 </a>
@@ -299,172 +334,70 @@
                 <div>
                     <p class="text-gray-900 font-bold text-lg">Belum ada pengajuan cuti</p>
                 </div>
-                
+
             </div>
         </div>
         @endif
 
     </div>
     <div id="rejectModal"
-    class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 
-    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
 
-        <h3 class="text-lg font-semibold mb-4">
-            Alasan Penolakan
-        </h3>
+            <h3 class="text-lg font-semibold mb-4">
+                Alasan Penolakan
+            </h3>
 
-        <form id="rejectForm" method="POST">
+            <form id="rejectForm" method="POST">
 
-            @csrf
+                @csrf
 
-            <textarea
-                name="alasan_penolakan"
-                rows="4"
-                required
-                class="w-full rounded-lg border border-gray-300 p-3"></textarea>
+                <textarea
+                    name="alasan_penolakan"
+                    rows="4"
+                    required
+                    class="w-full rounded-lg border border-gray-300 p-3"></textarea>
 
-            <div class="flex justify-end gap-2 mt-4">
+                <div class="flex justify-end gap-2 mt-4">
 
-                <button type="button"
-                    onclick="closeRejectModal()"
-                    class="bg-gray-200 px-4 py-2 rounded-lg">
+                    <button type="button"
+                        onclick="closeRejectModal()"
+                        class="bg-gray-200 px-4 py-2 rounded-lg">
 
-                    Batal
+                        Batal
 
-                </button>
+                    </button>
 
-                <button type="submit"
-                    class="bg-red-600 text-white px-4 py-2 rounded-lg">
+                    <button type="submit"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg">
 
-                    Simpan
+                        Simpan
 
-                </button>
+                    </button>
 
-            </div>
+                </div>
 
-        </form>
+            </form>
+
+        </div>
 
     </div>
 
 </div>
-    <!-- {{-- WORKFLOW SUMMARY & LEAVE STATISTICS --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {{-- Workflow Summary --}}
-        <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-6">Workflow Approval</h3>
-
-            <div class="space-y-4">
-
-                {{-- Pending Lead --}}
-                <div class="flex items-center justify-between p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Pending Lead</p>
-                        <p class="text-xs text-gray-600 mt-1">Menunggu Lead</p>
-                    </div>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-yellow-700 bg-yellow-100">
-                        8
-                    </span>
-                </div>
-
-                {{-- Pending HRD --}}
-                <div class="flex items-center justify-between p-4 bg-purple-50 rounded-xl border border-purple-100">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Pending HRD</p>
-                        <p class="text-xs text-gray-600 mt-1">Menunggu HRD</p>
-                    </div>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-purple-700 bg-purple-100">
-                        5
-                    </span>
-                </div>
-
-                {{-- Pending Head --}}
-                <div class="flex items-center justify-between p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Pending Head</p>
-                        <p class="text-xs text-gray-600 mt-1">Menunggu Head</p>
-                    </div>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-indigo-700 bg-indigo-100">
-                        3
-                    </span>
-                </div>
-
-                {{-- Pending Direktur --}}
-                <div class="flex items-center justify-between p-4 bg-pink-50 rounded-xl border border-pink-100">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Pending Direktur</p>
-                        <p class="text-xs text-gray-600 mt-1">Menunggu Direktur</p>
-                    </div>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-pink-700 bg-pink-100">
-                        2
-                    </span>
-                </div>
-
-            </div>
-        </div>
-
-        {{-- Leave Statistics --}}
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-6">Statistik Jenis Cuti</h3>
-
-            <div class="space-y-6">
-
-                {{-- Cuti Tahunan --}}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-700">Cuti Tahunan</p>
-                        <span class="text-sm font-bold text-gray-900">42 / 60 digunakan</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full" style="width: 70%"></div>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">70% - 18 hari tersisa</p>
-                </div>
-
-                {{-- Cuti Sakit --}}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-700">Cuti Sakit</p>
-                        <span class="text-sm font-bold text-gray-900">8 / 12 digunakan</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="bg-gradient-to-r from-red-500 to-orange-500 h-3 rounded-full" style="width: 67%"></div>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">67% - 4 hari tersisa</p>
-                </div>
-
-                {{-- Cuti Besar --}}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-700">Cuti Besar</p>
-                        <span class="text-sm font-bold text-gray-900">15 / 30 digunakan</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="bg-gradient-to-r from-orange-500 to-yellow-500 h-3 rounded-full" style="width: 50%"></div>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">50% - 15 hari tersisa</p>
-                </div>
-
-                {{-- Cuti Melahirkan --}}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-700">Cuti Melahirkan</p>
-                        <span class="text-sm font-bold text-gray-900">3 / 90 digunakan</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full" style="width: 3%"></div>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">3% - 87 hari tersisa</p>
-                </div>
-
-            </div>
-        </div>
-
-    </div> -->
-
-</div>
 <script>
+    let timer;
+
+    document.getElementById('search').addEventListener('keyup', function() {
+
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            document.getElementById('searchForm').submit();
+        }, 500);
+
+    });
+  
     function openRejectModal(id) {
         const form = document.getElementById('rejectForm');
 

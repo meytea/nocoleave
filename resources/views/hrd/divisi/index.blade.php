@@ -31,6 +31,32 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
+        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">Daftar Divisi</h2>
+            </div>
+            <form method="GET" id="searchForm">
+
+                <div class="relative w-full max-w-md">
+
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <x-heroicon-o-magnifying-glass
+                            class="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari..."
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-300 focus:border-cyan-500 focus:ring-cyan-500">
+
+                </div>
+
+            </form>
+        </div>
+
         <div class="overflow-x-auto">
 
             <table class="w-full text-sm">
@@ -118,5 +144,17 @@
         {{ $divisi->links() }}
     </div>
 
+    <script>
+        let timer;
 
+        document.getElementById('search').addEventListener('keyup', function() {
+
+            clearTimeout(timer);
+
+            timer = setTimeout(() => {
+                document.getElementById('searchForm').submit();
+            }, 500);
+
+        });
+    </script>
     @endsection

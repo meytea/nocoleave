@@ -16,7 +16,7 @@ class ApprovalCutiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -28,11 +28,45 @@ class ApprovalCutiController extends Controller
             'jenisCuti'
         ])
             ->where('status', 'pending_head')
+
             ->whereHas('user', function ($query) use ($divisi) {
                 $query->whereIn('divisi_id', $divisi);
             })
+
+
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'head.approval_cuti.index',
@@ -120,7 +154,7 @@ class ApprovalCutiController extends Controller
             ->with('success', 'Pengajuan berhasil ditolak.');
     }
 
-    public function pengajuanDitolak()
+    public function pengajuanDitolak(Request $request)
     {
         $user = Auth::user();
 
@@ -132,11 +166,44 @@ class ApprovalCutiController extends Controller
             'jenisCuti'
         ])
             ->where('status', 'ditolak')
+
             ->whereHas('user', function ($query) use ($divisi) {
                 $query->whereIn('divisi_id', $divisi);
             })
+
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'head.approval_cuti.ditolak',
@@ -144,7 +211,7 @@ class ApprovalCutiController extends Controller
         );
     }
 
-    public function pengajuanDisetujui()
+    public function pengajuanDisetujui(Request $request)
     {
         $user = Auth::user();
 
@@ -159,16 +226,80 @@ class ApprovalCutiController extends Controller
                 'pending_direktur',
                 'disetujui'
             ])
+
             ->whereHas('user', function ($query) use ($divisi) {
                 $query->whereIn('divisi_id', $divisi);
             })
+
+            ->when($request->get('status') === 'sedang_cuti', function ($query) {
+
+                $query->where('status', 'disetujui')
+                    ->whereDate('tanggal_mulai', '<=', today())
+                    ->whereDate('tanggal_selesai', '>=', today());
+            })
+
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->whereHas('user', function ($user) use ($search) {
+
+                        $user->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('roles', function ($role) use ($search) {
+                                $role->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('divisi', function ($divisi) use ($search) {
+                                $divisi->where('nama_divisi', 'like', "%{$search}%");
+                            });
+                    })
+
+                        ->orWhereHas('jenisCuti', function ($jenis) use ($search) {
+
+                            $jenis->where(
+                                'nama_cuti',
+                                'like',
+                                "%{$search}%"
+                            );
+                        })
+
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'head.approval_cuti.disetujui',
             compact('pengajuan_cuti')
         );
+    }
+
+    public function show($id)
+    {
+        $pengajuanCuti = PengajuanCuti::with([
+            'user',
+            'jenisCuti'
+        ])->findOrFail($id);
+
+        $riwayatApproval = ApprovalCuti::with([
+            'approver.roles'
+        ])
+            ->where('pengajuan_cuti_id', $pengajuanCuti->id)
+            ->latest()
+            ->get();
+
+        return view(
+            'head.approval_cuti.detail',
+            compact(
+                'pengajuanCuti',
+                'riwayatApproval'
+            )
+        );
+        
     }
 
     /**
@@ -190,10 +321,7 @@ class ApprovalCutiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ApprovalCuti $approvalCuti)
-    {
-        //
-    }
+    
 
     /**
      * Show the form for editing the specified resource.

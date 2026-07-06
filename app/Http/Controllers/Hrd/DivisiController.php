@@ -11,11 +11,22 @@ class DivisiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $divisi = Divisi::withCount('users')
-            ->latest()
-            ->paginate(10);
+        ->when($request->search, function ($query) use ($request) {
+
+            $query->where(
+                'nama_divisi',
+                'like',
+                "%{$request->search}%"
+            );
+
+        })
+
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
         return view('hrd.divisi.index', compact('divisi'));
     }
